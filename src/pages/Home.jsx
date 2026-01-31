@@ -6,7 +6,7 @@ const Home = () => {
         <div className="container px-4">
           <div className="row gx-4 justify-content-center">
             <div className="col-lg-8">
-              <h2>About this page</h2>
+              <h2>About this page 1</h2>
               <p className="lead">
                 This is a great place to talk about your webpage. This template
                 is purposefully unstyled so you can use it as a boilerplate or
