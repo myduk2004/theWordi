@@ -1,0 +1,40 @@
+.social-login {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .btn-google {
+    background-color: #db4437;
+    border: 1px solid #ccc;
+    color: #fff;
+    &:hover {
+      background-color: #c23321;
+    }
+  }
+
+  .btn-naver {
+    background-color: #03c75a;
+    color: #fff;
+    &:hover {
+      background-color: #02b151;
+    }
+  }
+
+  .btn-kakao {
+    background-color: #fee500;
+    color: #3c1e1e;
+    &:hover {
+      background-color: #fdd835;
+    }
+  }
+}

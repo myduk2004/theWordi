@@ -1,0 +1,38 @@
+// 추가 스타일
+.oauth-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 10px 0;
+  border: none;
+}
+
+.btn-google {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #333;
+}
+.btn-google:hover {
+  background-color: #f9fafb;
+}
+
+.btn-naver {
+  background-color: #03c75a;
+  color: #fff;
+}
+.btn-naver:hover {
+  background-color: #02b350;
+}
+
+.btn-kakao {
+  background-color: #fee500;
+  color: #3c1e1e;
+}
+.btn-kakao:hover {
+  background-color: #fdd835;
+}
