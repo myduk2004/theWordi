@@ -6,28 +6,20 @@ const Home = () => {
         <div className="container px-4">
           <div className="row gx-4 justify-content-center">
             <div className="col-lg-8">
-              <h2>About this page 1</h2>
-              <p className="lead">
-                This is a great place to talk about your webpage. This template
-                is purposefully unstyled so you can use it as a boilerplate or
-                starting point for you own landing page designs! This template
-                features:
+              <h2>About this page</h2>
+             
+              <p className="lead2">
+               엠마오로 가는 길에 제자 두명은 예수님이 가까이 오시고 대화하시는데도 
+               그분을 알아보지 못하였습니다. 
+               그럼에도 예수님은 가는 길 내내 성경을 설명해주시고 저녁까지 함께 하여서 빵을 찢어주셨습니다. 
+               그때에야 제자들은 비로소 눈이 열려 예수님을 알아보았습니다.
               </p>
-              <ul>
-                <li>Clickable nav links that smooth scroll to page sections</li>
-                <li>
-                  Responsive behavior when clicking nav links perfect for a one
-                  page website
-                </li>
-                <li>
-                  Bootstrap's scrollspy feature which highlights which section
-                  of the page you're on in the navbar
-                </li>
-                <li>
-                  Minimal custom CSS so you are free to explore your own unique
-                  design options
-                </li>
-              </ul>
+ 
+              <p className="lead2">
+              theWord.I는 우리가 
+              곁에 계신 주님을 찾을 수 있도록 하나님과 내가 교제하는 곳입니다.
+              </p> 
+              
             </div>
           </div>
         </div>
@@ -38,12 +30,16 @@ const Home = () => {
           <div className="row gx-4 justify-content-center">
             <div className="col-lg-8">
               <h2>Services we offer</h2>
-              <p className="lead">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aut
-                optio velit inventore, expedita quo laboriosam possimus ea
-                consequatur vitae, doloribus consequuntur ex. Nemo assumenda
-                laborum vel, labore ut velit dignissimos.
-              </p>
+              <ul>
+                <li>성경을 버전별로 검색할 수 있습니다. </li>
+                <li>
+                  오늘 묵상한 말씀을 기록하여 깊은 의미를 찾을 수 있습니다.
+                </li>
+                <li>
+                  기도제목을 기록할 수 있습니다.
+                </li>
+                 
+              </ul>
             </div>
           </div>
         </div>
@@ -56,10 +52,8 @@ const Home = () => {
             <div className="col-lg-8">
               <h2>Contact us</h2>
               <p className="lead">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero
-                odio fugiat voluptatem dolor, provident officiis, id iusto!
-                Obcaecati incidunt, qui nihil beatae magnam et repudiandae ipsa
-                exercitationem, in, quo totam.
+                . 
+                현재 준비중입니다.
               </p>
             </div>
           </div>

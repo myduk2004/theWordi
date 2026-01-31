@@ -524,6 +524,12 @@ progress {
   font-weight: 300;
 }
 
+
+.lead2 {
+  font-size: 1.15rem;
+  font-weight: 300;
+}
+
 .display-1 {
   font-size: calc(1.625rem + 4.5vw);
   font-weight: 300;
@@ -11168,7 +11174,13 @@ header {
   padding-bottom: 6rem;
 }
 
+// section {
+//   padding-top: 9rem;
+//   padding-bottom: 9rem;
+// }
+
 section {
-  padding-top: 9rem;
-  padding-bottom: 9rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
 }
+

@@ -99,7 +99,7 @@ const Header = ({ header }) => {
           <h1 className="fw-bolder">{title}</h1>
           <p className="lead">{subTitle}</p>
           <a className="btn btn-lg btn-light" href="/bible/create">
-            Start scrolling!
+            Start Search!
           </a>
         </div>
       </header>
