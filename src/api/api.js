@@ -25,7 +25,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config; 
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 
+      && !originalRequest._retry
+      && !originalRequest.url.includes("/jwt/refresh")) {
       // 401 + 재시도 안 한 경우
       originalRequest._retry = true; // 무한 루프 방지
       
@@ -34,12 +36,16 @@ api.interceptors.response.use(
         localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
         return api(originalRequest); // 원래 요청 재시도
-      } catch (err) {
-        localStorage.removeItem("accessToken");
-        return Promise.reject(err);
+      } catch (refreshError) {
+        localStorage.removeItem("accessToken"); 
+        //return Promise.reject(err);
+
+        return Promise.reject(
+          refreshError.response ?? refreshError
+        );
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response ?? error);
   }
 );
 

@@ -26,6 +26,7 @@ export const BibleApi = {
     return res.data;
   },
   delete: async (id) => {
-    await api.delete(`${API_URL}/verse/${id}`);
+    const res = await api.delete(`${API_URL}/verse/${id}`);
+    return res;
   },
 };

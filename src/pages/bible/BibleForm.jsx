@@ -1,4 +1,4 @@
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import { BibleApi } from "../../api/bibleApi";
 import BibleList from "../../components/BibleList";
 import BibleSchSelect from "../../components/BibleSchSelect"; 
@@ -15,6 +15,11 @@ const BibleForm = () => {
   const [errors, setErrors] = useState([]);
   const [list, setList] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const textRef = useRef(null);
+
+useEffect(() => {
+  textRef.current?.focus();
+}, [form.verse]);
 
   //성경구절 리스트 조회
   const loadData = async () => { 
@@ -62,15 +67,20 @@ const BibleForm = () => {
   const onDelete = async (verseId) => { 
     try 
     { 
-      if (confirm("삭제하시겠습니까?"))
-      { 
-        const data = await BibleApi.delete(verseId);
-        alert("삭제되었습니다!"); 
-        await loadData();
-      } 
+      if (!confirm("삭제하시겠습니까?")) return; 
+
+      const data = await BibleApi.delete(verseId);
+      alert("삭제되었습니다!"); 
+      await loadData();
+      
     } catch (err) 
     {
-      const errorMessage = err.response?.data?.message || "오류가 발생했습니다.";
+      const errorMessage = err.data?.message || "오류가 발생했습니다."; 
+      // const errorMessage =
+      //   err?.response?.data?.message ||
+      //   err?.data?.message ||
+      //   err?.message ||
+      //   "오류가 발생했습니다1.";
       alert(errorMessage); 
     }
   };
@@ -91,7 +101,7 @@ const BibleForm = () => {
         ...prev,
         verse: Number(prev.verse) + 1, 
         text: ""
-      }));
+      })); 
 
     } catch (err) {
       const errorMessage = err.response?.data?.message || "오류가 발생했습니다.";
@@ -170,9 +180,17 @@ const onClickSearchButton = async (e) => {
                     <textarea
                       className="form-control"
                       name="text"
+                      ref={textRef}
                       rows="3"
                       onChange={handleChange}
                       value={form.text}
+                      onKeyDown={(e)=>{
+                        if (e.key === "Enter" && !e.shiftKey)
+                        {
+                          
+                          handleSubmit(e);
+                        }
+                      }}
                     ></textarea>
                   </div>
 
