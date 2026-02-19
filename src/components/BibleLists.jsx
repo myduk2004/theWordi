@@ -26,7 +26,7 @@ const BibleLists = () => {
                         <div className="card-body" >   
                             {  data.verses?.map((verse) => (
                                     <p key={verse.verseId} className="card-text">
-                                        {verse.bookId}.{verse.text}
+                                        {verse.verseId}.{verse.text}
                                     </p> 
                                 ))  
                             } 
