@@ -16,7 +16,8 @@ const BibleSearch = () => {
     testament: "OLDT",
     bookId: 1,
     chapter: 1,
-    verse: "" 
+    verse: "" , 
+    verseTo:"",
   });
   const [errors, setErrors] = useState([]);
   const [list, setList] = useState([]); 
@@ -60,7 +61,9 @@ const BibleSearch = () => {
       const data = await BibleApi.getVerses(
         form.versionIds,
         form.bookId,
-        form.chapter 
+        form.chapter, 
+        form.verse, 
+        form.verseTo 
       );
 
       //console.log(data);
@@ -91,31 +94,67 @@ const BibleSearch = () => {
       setForm((prev) => ({
         ...prev,
         testament: value,  
-        bookId: filteredBook[0]?.bookId ?? "",
+        bookId: filteredBook[0]?.bookId ?? "" ,
+        chapter : "1",
+        verse :"",
+        verseTo : ""
       }));
-    }
+    } 
+    else if (name === "bookId") {  
+      setForm((prev) => ({
+        ...prev, 
+        bookId: value,
+        chapter : "1",
+        verse :"",
+        verseTo : ""
+      }));
+    } 
     else 
-    { 
+    {  
       setForm((prev) => ({
         ...prev,
-        [name]: name === "chapter" || name === "verse"
-          ? Number(value)
-          : value
+        [name]:  value 
       }));
     }
+  };
+
+  const validateNumber = ({val, label, required = false, min = 1}) =>{  
+    if (val === "")
+    {
+      return required? [`${label}을(를) 입력해주세요.`]:[];
+    }
+
+    const num = Number(val);    
+    return (Number.isNaN(num) || num < min)
+        ?[`${label}을(를) ${min} 이상의 숫자로 정확히 입력해주세요.`]
+        : []; 
   };
 
   const validate = () => {
     const tmpErr = [];
     if (!form.versionIds || form.versionIds.length < 1)
-      tmpErr.push("성경버전을 체크해주세요."); 
-
-    if (!form.chapter || form.chapter < 1)
-      tmpErr.push("장을 입력해주세요."); 
+      tmpErr.push("성경버전을 체크해주세요.");  
+ 
+    tmpErr.push(...validateNumber({val : form.chapter, label : "장", required :  true, min : 1}));
+    tmpErr.push(...validateNumber({val : form.verse, label : "절(시작)", required : false, min : 1}));
+    tmpErr.push(...validateNumber({val : form.verseTo, label : "절(종료)", required : false, min : 1}));
     
+
+    if (form.verse !== "" &&  form.verseTo !== "")
+    {
+      const verseNum = Number(form.verse);
+      const verseToNum = Number(form.verseTo);
+
+      if (!Number.isNaN(verseNum) && !Number.isNaN(verseToNum) && verseNum > verseToNum)
+      {
+        tmpErr.push("시작절은 종료절보다 클 수 없습니다.");
+      }
+    }
+
     setErrors(tmpErr);
     return tmpErr.length === 0;
   }; 
+
   
 const onClickSearchButton = async (e) => {
   e.preventDefault();  
@@ -123,10 +162,10 @@ const onClickSearchButton = async (e) => {
     return;
   } 
 
-  setForm({ 
-    ...form, 
-    verse: "" 
-  });  
+  // setForm({ 
+  //   ...form, 
+  //   verse: "" 
+  // });  
   await loadData();
 };
  
@@ -203,7 +242,8 @@ const onClickSearchButton = async (e) => {
                       장
                     </label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric" 
                       className="form-control"
                       name="chapter"
                       onChange={handleChange}
@@ -216,11 +256,26 @@ const onClickSearchButton = async (e) => {
                     </label>
 
                     <input
-                      type="number"
+                     type="text"
+                      inputMode="numeric" 
                       className="form-control"
                       name="verse"
                       onChange={handleChange}
                       value={form.verse}
+                    />
+                  </div>
+                  <div className="col-md-2">
+                    <label htmlFor="verse" className="form-label">
+                      절
+                    </label>
+
+                    <input
+                      type="text"
+                      inputMode="numeric" 
+                      className="form-control"
+                      name="verseTo"
+                      onChange={handleChange}
+                      value={form.verseTo}
                     />
                   </div>
               

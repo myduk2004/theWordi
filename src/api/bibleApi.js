@@ -2,10 +2,10 @@ import api from "./api";
 const API_URL = "/api/bible";
 
 export const BibleApi = {
-  getVerses: async (versionIds, bookId, chapter, verse) => {
+  getVerses: async (versionIds, bookId, chapter, verse, verseTo) => {
     
     const res = await api.get(`${API_URL}/verses`, {
-      params: { versionIds, bookId, chapter, verse },
+      params: { versionIds, bookId, chapter, verse, verseTo },
     });
     return res.data;
   }, 
