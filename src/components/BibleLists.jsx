@@ -5,7 +5,8 @@ const BibleLists = () => {
     const verses = useContext(VerseContext);  
   return (
     <>   
-    <div className={`row row-cols-1 row-cols-md-${verses?verses.length:1} mb-3`}>  
+    {/* <div className={`row row-cols-1 row-cols-md-${verses?verses.length:1} mb-3`}>     */}
+     <div className={`row row-cols-1 row-cols-md-${Math.min(verses?.length ?? 1, 4)} mb-3`}>     
         { verses?.length == 0 &&  
             <div className="col">
                 <div className="card mb-4 rounded-3 shadow-sm"> 

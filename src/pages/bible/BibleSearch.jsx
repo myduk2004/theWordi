@@ -148,7 +148,7 @@ const onClickSearchButton = async (e) => {
                     <label htmlFor="divBible" className="form-label">
                       성경버전
                     </label>
-                    <div name="divBible">  
+                    <div className="divBible">  
                       {  
                         version.map((d) => ( 
                           <div className="form-check form-check-inline"
