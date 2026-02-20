@@ -137,9 +137,9 @@ const onClickSearchButton = async (e) => {
         <div className="row gx-4 justify-content-center">
           <div className="col-lg-9 mb-2">
             <h4>* 성경조회</h4>
-          </div>
+          </div> 
 
-          <div className="col-lg-9">
+          <div className="col-lg-9">  
             <div className="card mb-4">
               <div className="card-header">킹제임스 표준역 {">"} 창세기</div>
               <div className="card-body">
@@ -242,10 +242,18 @@ const onClickSearchButton = async (e) => {
               </div>
             </div>
 
+            {/* <VerseContext.Provider value={list}>
+              <BibleLists></BibleLists>
+            </VerseContext.Provider> */}
+          </div>
+  
+ 
+          <div className={`col-lg-${(list?.length ?? 0)>3?12:9}`}>  
             <VerseContext.Provider value={list}>
               <BibleLists></BibleLists>
             </VerseContext.Provider>
-          </div>
+          </div> 
+
         </div>
       </div>
     </>
