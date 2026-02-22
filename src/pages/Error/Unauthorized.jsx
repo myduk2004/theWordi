@@ -1,6 +1,6 @@
  import React, { useState } from 'react';
 import { Link } from "react-router-dom";
-const Notfound = () => {
+const Unauthorized = () => {
   const [isHover, setIsHover] = useState(false);
 
   // 공통 스타일 객체들
@@ -36,23 +36,24 @@ const Notfound = () => {
     marginBottom: '40px',
     lineHeight: '1.6'
   };
-
-  
+ 
 
   return (
     <div style={containerStyle}>
       {/* 큰 에러 코드 */}
-      <h1 style={errorCodeStyle}>401</h1>
+      <h1 style={errorCodeStyle}>403</h1>
       
       {/* 메인 메시지 */}
-      <h2 style={messageStyle}>페이지가 존재하지 않습니다</h2>
+      <h2 style={messageStyle}>접근 권한이 없습니다</h2>
       
       {/* 상세 설명 */}
       <p style={descriptionStyle}>
-        죄송합니다. 요청하신 페이지가 존재하지 않습니다. 
-      </p> 
+        죄송합니다. 요청하신 페이지를 볼 수 있는 권한이 없습니다.<br />
+        로그인 상태를 확인하거나 관리자에게 문의해 주세요.
+      </p>
 
-       <Link className="btn btn-lg btn-primary" to="/">
+
+      <Link className="btn btn-lg btn-primary" to="/">
        메인화면으로
       </Link>
 
@@ -62,6 +63,6 @@ const Notfound = () => {
   );
 };
 
-export default Notfound;
+export default Unauthorized;
 
  

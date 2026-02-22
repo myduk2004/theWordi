@@ -27,7 +27,7 @@ const BibleSearch = () => {
   const [version, setVersion] = useState([]);
   const [allBook, setAllBook] = useState([]);
   const [book, setBook] = useState([]);
-
+ const [pageTitle, setPageTitle] = useState("조회할 항목을 선택해주세요.");
 
   useEffect(() => {
       const init = async () => {
@@ -76,6 +76,7 @@ const BibleSearch = () => {
 
   const handleChange = (e) => {
     const { name, value, checked } = e.target;  
+    
 
     //version체크시
     if (name === "versionIds")
@@ -108,6 +109,8 @@ const BibleSearch = () => {
         verse :"",
         verseTo : ""
       }));
+
+      setPageTitle(e.target.selectedOptions[0].text);
     } 
     else 
     {  
@@ -175,12 +178,23 @@ const onClickSearchButton = async (e) => {
       <div className="container px-4 mt-5 mb-5">
         <div className="row gx-4 justify-content-center">
           <div className="col-lg-9 mb-2">
-            <h4>* 성경조회</h4>
-          </div> 
+            <h4>
+              <i className="bi bi-search" 
+             style={{
+                color: "#E0A800"
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#E0A800")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "#6C757D")}
+            /> 
+            성경조회</h4> 
+          </div>  
 
           <div className="col-lg-9">  
-            <div className="card mb-4">
-              <div className="card-header">킹제임스 표준역 {">"} 창세기</div>
+            <div className="card mb-4"> 
+              <div className="card-header d-flex align-items-center fw-semibold fs-6"  style={{ color: "#364FC7" }}>             
+                {pageTitle} 
+              </div>
+
               <div className="card-body">
                 <form className="row g-3">
                   <div className="col-md-12">

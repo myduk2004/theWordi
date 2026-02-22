@@ -38,12 +38,12 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const restoreUser = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("accessToken");    
       if (!token) {
-        setLoading(false);
+        setLoading(false); 
         return;
       }
-
+ 
       try {
         const res = await api.get("/user");
         setUser({

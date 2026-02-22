@@ -2,7 +2,16 @@ import { useContext, useState } from "react";
 import { VerseContext } from  "../pages/bible/BibleSearch"; 
 
 const BibleLists = () => {  
-    const verses = useContext(VerseContext);  
+    const verses = useContext(VerseContext);   
+    const [selectedRowIdx, setSelectedRowIdx] = useState(null); 
+    const [isSelectedRow, setSelectedRow] = useState(false); 
+    const handleMouseDown = (idx) =>{ 
+        if (selectedRowIdx === idx)
+            setSelectedRowIdx(null);
+        else 
+            setSelectedRowIdx(idx);
+    } 
+  
   return (
     <>   
     {/* <div className={`row row-cols-1 row-cols-md-${verses?verses.length:1} mb-3`}>     */}
@@ -24,9 +33,16 @@ const BibleLists = () => {
                         <div className={`card-header py-3 text-center ${idx === 0?"text-bg-primary border-primary":""}`}>
                             <h4 className="my-0 fw-normal">{data.bibleVersion.versionName}</h4>
                         </div>
-                        <div className="card-body" >   
-                            {  data.verses?.map((verse) => (
-                                    <p key={verse.verseId} className="card-text">
+                        <div className="card-body">   
+                            {  data.verses?.map((verse, rowIdx) => (
+                                    <p key={verse.verseId} 
+                                    onMouseDown={()=> handleMouseDown(rowIdx)} 
+                                    style={{
+                                         backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
+                                         cursor : "pointer", 
+                                         
+                                    }}
+                                    className="card-text">
                                         {verse.verse}.{verse.text}
                                     </p> 
                                 ))  

@@ -9,7 +9,7 @@ const Header = ({ header }) => {
   const { bgCss, title, subTitle } = header;
   const [err, setErr] = useState("");
   const { user, contextLogout } = useUser();
-
+ 
   const handleLogout = async () => {
     try {
       const res = await api.post("/logout");
@@ -29,8 +29,7 @@ const Header = ({ header }) => {
         <div className="container px-4">
           <Link className="navbar-brand" to="/">
             TheWord.I
-          </Link>
-
+          </Link> 
           <button
             className="navbar-toggler"
             type="button"
@@ -44,33 +43,42 @@ const Header = ({ header }) => {
           </button>
           <div className="collapse navbar-collapse" id="navbarResponsive">
             <ul className="navbar-nav ms-auto">
+              {user.role?.includes("ADMIN") && (
               <li className="nav-item">
                 <Link className="nav-link" to="/bible/create">
                   성경쓰기
                 </Link>
               </li>
+              )}
+
               <li className="nav-item">
                 <Link className="nav-link" to="/bible/search">
                   성경검색
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/meditation">
-                  말씀의 묵상
-                </Link>
-              </li>
+ 
+            {user.isLogin && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/meditation">
+                    묵상
+                  </Link>
+                </li> 
 
-              <li className="nav-item">
-                <Link className="nav-link" to="/">
-                  기도
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/">
-                  {user.isLogin ? `${user.name}님 환영합니다.` : ""}
-                </Link>
-              </li>
-
+                <li className="nav-item">
+                  <Link className="nav-link" to="/meditation">
+                    Note
+                  </Link>
+                </li> 
+                
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">
+                    {user.name}님 환영합니다.
+                  </Link>
+                </li>
+              </>
+              )}
+                
               <li className="nav-item">
                 {user.isLogin ? (
                   <Link className="nav-link" to="/">
@@ -98,9 +106,9 @@ const Header = ({ header }) => {
         <div className="container px-4 text-center">
           <h1 className="fw-bolder">{title}</h1>
           <p className="lead">{subTitle}</p>
-          <a className="btn btn-lg btn-light" href="/bible/create">
+          <Link className="btn btn-lg btn-light" to="/bible/search">
             Start Search!
-          </a>
+          </Link>
         </div>
       </header>
     </>
