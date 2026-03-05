@@ -47,7 +47,7 @@ const MeditationForm = () => {
                     formData.append('file', blob);
 
                     const response = await api.post(`/file/upload`, formData);
-                    const data = await response.json();
+                    const data = response.data;
                     callback(data.url, 'image');
                 }
             }
