@@ -11,7 +11,7 @@ import BibleSearch  from "../../components/BibleSearch";
  import { todayYMD } from '../../util/common.js';
 
 
- import api from "./api"; 
+ import api from "../../api/api"; 
  
 
 
