@@ -30,3 +30,10 @@ export const BibleApi = {
     return res;
   },
 };
+
+
+
+export const TESTAMENTS  = [
+  { testamentId: "OLDT", testamentNm: "구약" },
+  { testamentId: "NEWT", testamentNm: "신약" },
+]; 

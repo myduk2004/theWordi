@@ -11,6 +11,7 @@ import Login from "../pages/Login";
 import MainLayout from "../layouts/MainLayout";
 import BibleForm from "../pages/bible/BibleForm";
 import BibleSearch from "../pages/bible/BibleSearch";
+import MeditationForm from "../pages/meditation/MeditationForm";
 import { useUser } from "../contexts/UserContext";
 
 const AppRouter = () => {
@@ -70,6 +71,16 @@ const AppRouter = () => {
               element={
                 <MainLayout>
                   <UserPage />
+                </MainLayout>
+              }
+            />  
+
+
+            <Route
+              path="/meditation"
+              element={
+                <MainLayout>
+                  <MeditationForm />
                 </MainLayout>
               }
             />  

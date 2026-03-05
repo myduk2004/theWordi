@@ -11183,4 +11183,22 @@ section {
   padding-top: 5rem;
   padding-bottom: 5rem;
 }
+ 
 
+ 
+/* TOAST UI Editor 내부의 표 제목행 커스텀 */
+.toastui-editor-contents table thead th {
+    background-color: #1A3C6E !important; /* 배경: 딥 블루 */
+}
+
+.toastui-editor-contents table thead tr th {
+    color: #FFFFFF !important; /* 글자: 하양 */
+    font-weight: 600;
+    border-bottom: 2px solid #000000; /* 하단에 검정색 포인트 선 */
+    padding: 12px 8px !important;
+}
+
+/* 마우스를 올렸을 때 본문 행의 색상 (선택사항) */
+.toastui-editor-contents table tbody tr:hover {
+    background-color: #F7FAFC;
+}
