@@ -12,7 +12,7 @@ import BibleSearch  from "../../components/BibleSearch";
 
 
  import api from "./api"; 
-const API_URL = "/api/bible";
+ 
 
 
 const MeditationForm = () => {
@@ -46,7 +46,7 @@ const MeditationForm = () => {
                     const formData = new FormData(); 
                     formData.append('file', blob);
 
-                    const response = await api.post(`${API_URL}/file/upload`, formData);
+                    const response = await api.post(`/file/upload`, formData);
                     const data = await response.json();
                     callback(data.url, 'image');
                 }
