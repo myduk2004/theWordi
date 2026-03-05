@@ -44,9 +44,9 @@ const MeditationForm = () => {
             hooks : {
                 addImageBlobHook : async (blob, callback) =>{
                     const formData = new FormData(); 
-                    formData.append('image', blob);
+                    formData.append('file', blob);
 
-                    const response = await api.post(`${API_URL}/api/image`, formData);
+                    const response = await api.post(`${API_URL}/file/upload`, formData);
                     const data = await response.json();
                     callback(data.url, 'image');
                 }
