@@ -12,6 +12,8 @@ import MainLayout from "../layouts/MainLayout";
 import BibleForm from "../pages/bible/BibleForm";
 import BibleSearch from "../pages/bible/BibleSearch";
 import MeditationForm from "../pages/meditation/MeditationForm";
+import MeditationDetail from "../pages/meditation/MeditationDetail";
+import MeditationList from "../pages/meditation/MeditationList";
 import { useUser } from "../contexts/UserContext";
 
 const AppRouter = () => {
@@ -77,10 +79,37 @@ const AppRouter = () => {
 
 
             <Route
-              path="/meditation"
+              path="/meditations/new"
               element={
                 <MainLayout>
                   <MeditationForm />
+                </MainLayout>
+              }
+            />  
+
+             <Route
+              path="/meditations/:meditationId/edit"
+              element={
+                <MainLayout>
+                  <MeditationForm />
+                </MainLayout>
+              }
+            />  
+
+            <Route
+              path="/meditations/:meditationId"
+              element={
+                <MainLayout>
+                  <MeditationDetail />
+                </MainLayout>
+              }
+            />  
+
+            <Route
+              path="/meditations"
+              element={
+                <MainLayout>
+                  <MeditationList />
                 </MainLayout>
               }
             />  

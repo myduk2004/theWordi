@@ -178,15 +178,7 @@ const onClickSearchButton = async (e) => {
       <div className="container px-4 mt-5 mb-5">
         <div className="row gx-4 justify-content-center">
           <div className="col-lg-9 mb-2">
-            <h4>
-              <i className="bi bi-search" 
-             style={{
-                color: "#E0A800"
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "#E0A800")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "#6C757D")}
-            /> 
-            성경조회</h4> 
+            <h4><i className="bi bi-search  fs-4 " style={{ color: "#6610f2" }} />  성경조회</h4> 
           </div>  
 
           <div className="col-lg-9">  
@@ -197,10 +189,7 @@ const onClickSearchButton = async (e) => {
 
               <div className="card-body">
                 <form className="row g-3">
-                  <div className="col-md-12">
-                    <label htmlFor="divBible" className="form-label">
-                      성경버전
-                    </label>
+                  <div className="col-md-12"> 
                     <div className="divBible">  
                       {  
                         version.map((d) => ( 
@@ -217,10 +206,7 @@ const onClickSearchButton = async (e) => {
                       } 
                     </div> 
                   </div> 
-                  <div className="col-md-2">
-                    <label htmlFor="testament" className="form-label">
-                      신/구약
-                    </label>
+                  <div className="col-md-2"> 
                     <select
                       name="testament"
                       value={form.testament || ""}
@@ -234,10 +220,7 @@ const onClickSearchButton = async (e) => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-md-3">
-                    <label htmlFor="bookId" className="form-label">
-                      책명
-                    </label>
+                  <div className="col-md-3"> 
                     <select
                       name="bookId"
                       value={form.bookId || ""}
@@ -251,61 +234,62 @@ const onClickSearchButton = async (e) => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-md-2">
-                    <label htmlFor="chapter" className="form-label">
-                      장
-                    </label>
+                  <div className="col-md-2"> 
                     <input
                       type="text"
                       inputMode="numeric" 
                       className="form-control"
+                      placeholder="장"
                       name="chapter"
                       onChange={handleChange}
                       value={form.chapter}
                     />
                   </div>
-                  <div className="col-md-2">
-                    <label htmlFor="verse" className="form-label">
-                      절
-                    </label>
-
+                  <div className="col-md-2"> 
                     <input
                      type="text"
                       inputMode="numeric" 
                       className="form-control"
+                      placeholder="시작절"
                       name="verse"
                       onChange={handleChange}
                       value={form.verse}
                     />
                   </div>
-                  <div className="col-md-2">
-                    <label htmlFor="verse" className="form-label">
-                      절
-                    </label>
-
+                  <div className="col-md-2"> 
                     <input
                       type="text"
                       inputMode="numeric" 
                       className="form-control"
+                      placeholder="종료절"
                       name="verseTo"
                       onChange={handleChange}
                       value={form.verseTo}
                     />
                   </div>
+
+                  <div className="col-md-1"> 
+                   <button
+                      type="button"
+                      className="btn p-0 me-2 text-primary"
+                      onClick={onClickSearchButton} name="btn2"
+                    ><i className="bi bi-search fs-5"></i> </button>  
+                  </div>
               
+
+
+
                   <div className="col-md-12 d-flex justify-content-end"> 
                     {errors.map((e, index) => (
                       <p key={e} className="text-danger me-3">
                         * {e}
                       </p>
                     ))}
-                    <button
+                    {/* <button
                       type="button"
-                      className="btn btn-primary me-2"
+                      className="btn p-0 me-2 text-primary"
                       onClick={onClickSearchButton}
-                    >
-                      조회
-                    </button> 
+                    ><i className="bi bi-search fs-5"></i> </button>   */}
                   </div>
                 </form>
               </div>

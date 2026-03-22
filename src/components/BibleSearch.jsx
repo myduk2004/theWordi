@@ -7,6 +7,8 @@ const BibleSearch = ({onSelect}) => {
     const [allBook, setAllBook] = useState([]);
     const [book, setBook] = useState([]);
     const [errors, setErrors] = useState([]);
+    
+    const [bibleVersion, setBibleVersion] = useState([]);
     const [verses, setVerses] = useState([]); 
     const [open, setOpen] = useState(false);
     const closeBtn = useRef(null);
@@ -18,6 +20,8 @@ const BibleSearch = ({onSelect}) => {
         verse: "" , 
         verseTo:"",
     });
+
+ 
 
     useEffect(()=>{ 
 
@@ -115,6 +119,7 @@ const BibleSearch = ({onSelect}) => {
             searchForm.verseTo 
         ); 
         
+        setBibleVersion(data?.[0]?.bibleVersion ?? []);
         setVerses(data?.[0]?.verses ?? []); 
  
     }
@@ -141,8 +146,11 @@ const BibleSearch = ({onSelect}) => {
         await loadData();
     }; 
 
-    const onVerseClick = (bookName, chapter, verse, text) =>{ 
-        onSelect({bookName, chapter, verse, text});
+    const onVerseClick = (bookId, bookName, chapter, verseId, verse, text) =>{ 
+
+        const versionId = bibleVersion.versionId;
+        const versionName = bibleVersion.versionName; 
+        onSelect({ versionId, versionName, bookId, bookName, verseId, chapter, verse, text });
     } 
     return (
     <> 
@@ -253,7 +261,7 @@ const BibleSearch = ({onSelect}) => {
                             className="d-flex justify-content-between align-items-center py-2">
                             <span
                                 style={{ cursor: "pointer" }}
-                                onClick={() => onVerseClick(verse.bookName, verse.chapter, verse.verse, verse.text )}
+                                onClick={() => onVerseClick(verse.bookId, verse.bookName, verse.chapter, verse.verseId, verse.verse, verse.text )}
                             >{verse.chapter}:{verse.verse} {verse.text}</span> 
                             <span
                                 className="text-danger ms-3 p-1"
@@ -261,7 +269,7 @@ const BibleSearch = ({onSelect}) => {
                                 onMouseOver={(e) => (e.target.style.opacity = 0.7)}
                                 onMouseOut={(e) => (e.target.style.opacity = 1)}
                                 style={{ fontSize: "10px", cursor: "pointer" }}
-                                onClick={() => onVerseClick(verse.bookName, verse.chapter, verse.verse, verse.text )}
+                                onClick={() => onVerseClick(verse.bookId, verse.bookName, verse.chapter, verse.verseId, verse.verse, verse.text )}
                                 >add</span>
                         </div>)
                 })}   

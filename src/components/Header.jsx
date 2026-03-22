@@ -60,7 +60,7 @@ const Header = ({ header }) => {
             {user.isLogin && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/meditation">
+                  <Link className="nav-link" to="/meditations">
                     묵상
                   </Link>
                 </li> 

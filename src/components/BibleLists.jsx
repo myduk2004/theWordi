@@ -40,7 +40,7 @@ const BibleLists = () => {
                                     style={{
                                          backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
                                          cursor : "pointer", 
-                                         
+                                        
                                     }}
                                     className="card-text">
                                         {verse.verse}.{verse.text}
