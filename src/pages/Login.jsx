@@ -122,7 +122,7 @@ export default function Login() {
         <hr />
 
         <div className="text-center">
-          <a href="/register" className="text-decoration-none">
+          <a href="/join" className="text-decoration-none">
             회원가입
           </a>{" "}
           |{" "}

@@ -17,13 +17,22 @@ const BibleLists = () => {
     {/* <div className={`row row-cols-1 row-cols-md-${verses?verses.length:1} mb-3`}>     */}
      <div className={`row row-cols-1 row-cols-md-${Math.min(verses?.length ?? 1, 6)} mb-3`}>     
         { verses?.length == 0 &&  
+                 
             <div className="col">
-                <div className="card mb-4 rounded-3 shadow-sm"> 
-                    <div className="card-body">
-                        <p className="card-text">- 조회된 데이터가 없습니다.</p>
-                    </div>
+                <div className="card mb-4 rounded-3 shadow-sm">
+                    <div className="card-body py-3 bg-primary-subtle text-primary-emphasis">
+                        <h6 className="my-0 fw-normal"><i class="bi bi-exclamation-circle"></i> 조회된 데이터가 없습니다.</h6>
+                    </div> 
                 </div>
             </div>
+                
+            // <div className="col">
+            //     <div className="card mb-4 rounded-3 shadow-sm"> 
+            //         <div className="card-body">
+            //             <p className="card-text">- 조회된 데이터가 없습니다.</p>
+            //         </div>
+            //     </div>
+            // </div>
         } 
         
         { verses?.map((data, idx) => {

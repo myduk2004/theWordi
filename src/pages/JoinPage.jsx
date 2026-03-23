@@ -96,6 +96,7 @@ function JoinPage() {
           required
           minLength={4}
         />
+        
         {username.length >= 4 && isUsernameValid === false && (
           <p>이미 사용 중인 아이디입니다.</p>
         )}
