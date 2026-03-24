@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
+import { joinApi } from "../api/joinApi"; 
 
 const validationRule = {
     username: {
@@ -52,7 +53,7 @@ const getIconColor = (isTouched, isValid) => {
     if (!isTouched) return COLORS.default;
     return isValid ? COLORS.valid : COLORS.invalid;
 };
-
+  
 const Join = () =>{
 
 const [submitted, setSubmitted] = useState(false);
@@ -60,22 +61,69 @@ const [error, setError] = useState("");
 const [form, setForm] = useState({ username : "", password : "",  name : "", email : ""});
 const [touched, setTouched] = useState({ username : false, password : false, name: false, email: false});  
 const [show, setShow] = useState(false);
+const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+const [isCheckingUserName, setIsCheckingUsername] = useState(false);
 const allValid = Object.keys(validationRule).every((key) => isFieldValid(key, form[key]));
-
+const navigate = useNavigate();
 const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
 };
 
-const handleBlur = (e) =>{
+const handleBlur = async (e) =>{
     const { name } = e.target; 
-     setTouched((prev) => ({ ...prev, [name]: true }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
+
+    if (name === "username" && isFieldValid("username", form.username))
+    {
+        setIsCheckingUsername(true); 
+        const userExists = await joinApi.isExistUser(form.username);
+        setIsUsernameAvailable(!userExists);
+        setIsCheckingUsername(false);
+    } 
 };
 
-const handleSubmit = (e) =>{
-    e.preventDefault();
+const handleSubmit = async (e) =>{
+    e.preventDefault(); 
+
+    try 
+    {
+        if (allValid && isUsernameAvailable && !isCheckingUserName)
+        { 
+            const data = await joinApi.create(form);  
+            navigate("/join/complete", {
+                state: {
+                    username : form.username, 
+                    email : form.email, 
+                    name : form.name
+                }
+            });
+        }
+    }
+    catch(err)
+    { 
+        console.log("err", err);
+    }  
 };
+
+
+//username만 사용
+const handleValidColor = (isTouched, isValid, bDirect) =>{
+
+    if (bDirect)
+    {
+        //직접 컬러코드 지정
+        if (!isTouched) return COLORS.default;
+        return (isValid && isUsernameAvailable) ? COLORS.valid : COLORS.invalid;  
+    }
+    else 
+    {
+        //bootstrap 속성명 리턴
+        if (!isTouched) return "";
+        return (isValid && isUsernameAvailable) ? "is-valid" : "is-invalid";  
+    }
+}
 
 return ( 
     <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
@@ -88,10 +136,14 @@ return (
                 <div className="mb-3">
                     <div className="input-group">
                         <span className="input-group-text bg-white border-end-0"
-                            style={{ borderColor: getIconColor(touched.username, isFieldValid("username", form.username)) }}>                         
+                            style={{ borderColor: 
+                                    ( handleValidColor(touched.username, isFieldValid("username", form.username), true))} 
+                            }>                         
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                                fill="none" viewBox="0 0 24 24" 
-                                stroke={ getIconColor(touched.username, isFieldValid("username", form.username))}
+                                fill="none" viewBox="0 0 24 24"  
+                                stroke={  
+                                    handleValidColor(touched.username, isFieldValid("username", form.username), true)
+                                } 
                                 strokeWidth="1.8">
                                 <circle cx="12" cy="8" r="4"/>
                                 <path strokeLinecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -101,9 +153,7 @@ return (
                             type="text"
                             name="username"
                             className={`form-control form-control-lg border-start-0 ${
-                                touched.username
-                                    ? isFieldValid("username", form.username) ? "is-valid" : "is-invalid"
-                                    : ""
+                                handleValidColor(touched.username, isFieldValid("username", form.username), false)
                             }`}
                             placeholder="아이디"
                             required
@@ -114,8 +164,23 @@ return (
                     </div>
                 </div>
                 {/* 규칙리스트 */} 
-                {touched.username && !isFieldValid("username", form.username) && (
+                {touched.username && isUsernameAvailable && (
                     <div className="row mt-1 mb-2 ps-1">
+                        <div key="availableId" className="col-12 small text-success">
+                        {"o"} 사용 가능한 아이디
+                        </div> 
+                    </div> 
+                )}
+                {touched.username && !isUsernameAvailable && (
+                    <div className="row mt-1 mb-2 ps-1">
+                        <div key="notAvailableId" className="col-12 small text-danger">
+                        {"x"} 사용 불가능한 아이디
+                        </div> 
+                    </div> 
+                )}  
+
+                {touched.username && !isFieldValid("username", form.username) && (
+                    <div className="row mt-1 mb-2 ps-1"> 
                         {getResults("username", form.username).map((r) => (
                             <div key={r.label} className={`col-6 small ${r.passed ? "text-success" : "text-danger"}`}>
                                 {r.passed ? "o" : "x"} {r.label}
@@ -177,7 +242,7 @@ return (
                 </div>
                 {/* 규칙리스트 */}
                 {touched.password && !isFieldValid("password", form.password) && (
-                    <div className="row mt-1 mb-2 ps-1">
+                    <div className="row mt-1 mb-2 ps-1"> 
                         {getResults("password", form.password).map((r) => (
                             <div key={r.label} className={`col-6 small ${r.passed ? "text-success" : "text-danger"}`}>
                                 {r.passed ? "o" : "x"} {r.label}
@@ -271,11 +336,11 @@ return (
                 </div>}
 
                 <div className="d-grid">
-                    <button type="submit" 
+                    <button type="button" 
                     className="btn btn-primary btn-lg" 
-                     disabled={!allValid}
+                    disabled={!allValid || !isUsernameAvailable || isCheckingUserName}
                     onClick={handleSubmit}>
-                    가입하기
+                    {isCheckingUserName? "아이디 확인중..." : "가입하기"}
                     </button>
                 </div>
             </form> 

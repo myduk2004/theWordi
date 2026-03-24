@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import JoinPage from "../pages/JoinPage";
 import Join from "../pages/Join";
+import JoinComplete from "../pages/JoinComplete";
 import CookiePage from "../pages/CookiePage";
 import UserPage from "../pages/UserPage";
 
@@ -28,6 +29,7 @@ const AppRouter = () => {
           <Route path="/login" element={<Login></Login>}></Route>
           <Route path="/joinPage" element={<JoinPage></JoinPage>}></Route>
           <Route path="/join" element={<Join></Join>}></Route>
+          <Route path="/join/complete" element={<JoinComplete></JoinComplete>}></Route>
           <Route path="/cookie" element={<CookiePage></CookiePage>}></Route> 
       
           {/* Not Found */}
