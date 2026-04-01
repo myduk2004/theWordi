@@ -1,8 +1,5 @@
  
-import { useNavigate, useLocation } from "react-router-dom"; 
-import { joinApi } from "../api/joinApi"; 
-
-
+import { useNavigate, useLocation } from "react-router-dom";  
 const JoinComplete = () => {
   const navigate = useNavigate();
   const location = useLocation();

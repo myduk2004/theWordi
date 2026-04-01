@@ -76,6 +76,7 @@ export default function Login() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="아이디"
               required
+              autoFocus
             />
           </div>
 

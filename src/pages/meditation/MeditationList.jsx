@@ -44,7 +44,14 @@ const loadData = async (curPage, reset = false) =>{
    
     try 
     {   
-        const data = await MeditationApi.getList({...searchOption,  page : curPage, size : 6 }); 
+
+        const searchParam = {
+            title : searchOption.searchItem === "title"?searchOption.keyword:"",
+            text : searchOption.searchItem === "text"?searchOption.keyword:"",
+            startDate : searchOption.startDate, 
+            endDate : searchOption.endDate
+        }
+        const data = await MeditationApi.getList({...searchParam,  page : curPage, size : 6 }); 
         const newContent = data?.content??[]; 
 
         setList(prev => (curPage === 0? newContent : [...prev, ...newContent]));  
@@ -52,9 +59,7 @@ const loadData = async (curPage, reset = false) =>{
         
         hasNextRef.current = !(data?.last ?? true);
         setHasNext(hasNextRef.current);
-
-        console.log(searchOption);
-        console.log(data);
+ 
     }
     catch(err)
     {
@@ -169,7 +174,7 @@ return (
                         <div className="col">
                             <div className="card mb-4 rounded-3 shadow-sm">
                                 <div className="card-body py-3 bg-primary-subtle text-primary-emphasis">
-                                    <h6 className="my-0 fw-normal"><i class="bi bi-exclamation-circle"></i> 조회된 데이터가 없습니다.</h6>
+                                    <h6 className="my-0 fw-normal"><i className="bi bi-exclamation-circle"></i> 조회된 데이터가 없습니다.</h6>
                                 </div> 
                             </div>
                         </div>
@@ -186,7 +191,9 @@ return (
                             <div className="col d-flex" key={d.meditationId}>
                                 <div className="card mb-4 rounded-3 shadow-sm  w-100 d-flex flex-column">
                                     <div className="card-header py-3 text-center">
-                                        <h5 className="my-0 fw-normal">{d.title}</h5>
+                                        <h6 className="my-0 fw-normal">
+                                            {d.title.length>10?d.title.substring(0,30) + "...":d.title}
+                                            </h6>
                                     </div>
                                     <div className="card-body  d-flex flex-column"> 
                                         <ul className="list-unstyled mt-3 mb-4 flex-grow-1">

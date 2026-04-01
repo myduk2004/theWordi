@@ -66,8 +66,8 @@ const Header = ({ header }) => {
                 </li> 
 
                 <li className="nav-item">
-                  <Link className="nav-link" to="/meditation">
-                    Note
+                  <Link className="nav-link" to="/readingPlan">
+                    읽기계획표
                   </Link>
                 </li> 
                 

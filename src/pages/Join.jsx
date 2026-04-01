@@ -160,6 +160,7 @@ return (
                             value={form.username}
                             onChange={handleChange}
                             onBlur={handleBlur}
+                            autoFocus 
                         />
                     </div>
                 </div>
