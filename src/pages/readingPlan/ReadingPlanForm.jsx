@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from "react";  
 import { todayYMD } from '../../util/common.js';
 import { readingPlanApi } from "../../api/readingPlanApi";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap"; // 추가
+import { Modal, Button, Form, Row, Col } from "react-bootstrap";  
+import PlanBookTodo from "../../components/PlanBookTodo"; 
 
 const ReadingPlanForm = () =>{
-
+ 
 const [show, setShow] = useState(false); 
 const [planForm, setPlanForm] = useState({
     planId : null,
@@ -19,24 +20,37 @@ const [errorPlan, setErrorPlan] = useState({
 });
  
 const [plans, setPlans] = useState([]);
+const [selectedPlan, SetSelectedPlan] = useState({
+    planId :18, 
+    versionId : "KSKJB"
+});
 
-useEffect(()=>{
+const loadData = async(planId, versionId) => {
+    try 
+    { 
+        const list = await readingPlanApi.getAll();              
+        setPlans(list);  
 
-    const loadData = async() => {
-        try 
+        //선택된 계획 처리(저장,수정,삭제 & 책 읽기 등록 후 갱신)
+        if (planId == null || versionId == null)
         {
-         
-            const list = await readingPlanApi.getAll();  
-            console.log(list);
-            setPlans(list);  
+           planId = list?.at(-1)?.planId??0;
+           versionId = list?.at(-1)?.versionId??""
         }
-        catch(err)
-        {
-            console.error("데이터 로드 실패", err);
-        }  
+        
+        SetSelectedPlan({
+            planId : planId, 
+            versionId : versionId 
+        });   
     }
+    catch(err)
+    {
+        console.error("데이터 로드 실패", err);
+    }  
+}
 
-    loadData();
+useEffect(()=>{  
+    loadData(null, null);
 }, [])
 
 const onClickSavePlan = async() =>{   
@@ -53,19 +67,21 @@ const onClickSavePlan = async() =>{
 
     try 
     {
-        const res = await (planForm.planId === null?
-                            readingPlanApi.create(planForm)
-                            :readingPlanApi.update(planForm));
-        const list = await readingPlanApi.getAll();  
-        setPlans(list); 
+       let res;
+        if (planForm.planId === null) {
+            res = await readingPlanApi.create(planForm); 
+            loadData(null, planForm.versionId); 
+        } else {
+            await readingPlanApi.update(planForm);
+            loadData(planForm.planId, planForm.versionId);
+        }
     }
     catch(err)
     {
-         console.error("저장 중 오류 발생", err);
+        console.error("저장 중 오류 발생", err);
     } 
 
-    handleClose();
-       
+    handleClose(); 
 }
  
 const handleChangePlan = (e) =>{
@@ -110,8 +126,7 @@ const handleDelete = async() =>{
     try 
     {
         await readingPlanApi.delete(planForm.planId);
-        const list = await readingPlanApi.getAll();  
-        setPlans(list); 
+        loadData(null, null);  
     }
     catch(err)
     {
@@ -119,6 +134,8 @@ const handleDelete = async() =>{
     }  
     handleClose();
 }
+
+ 
 return ( 
     <div className="container px-4 mt-5 mb-5"> 
         <div className="row gx-4 justify-content-center">
@@ -207,7 +224,7 @@ return (
                             <div className="card-body">  
                                 {plans != null && plans.map((d, index) => {
 
-                                    const progress = d.readingCount == 0?0:(d.readingCount/66 * 100).toFixed(1);
+                                    const progress = d.bookCount == 0?0:(d.bookCount/66 * 100).toFixed(1);
                                    
                                     return (
                                     <div className="row g-3 mb-2 flex-nowrap align-items-center" key={d.planId}>  
@@ -229,261 +246,14 @@ return (
                 </div> 
             </div>
 
-            <div className="col-lg-9">  
-                <div className="card mb-4 rounded-3 shadow-sm">
-                    <div className="card-header">
-
-                        <div className="row g-3 align-items-center">
-                            <div className="col-md-10">
-                                <h5 className="my-0 fw-normal">진행목록</h5> 
-                            </div>
-                            <div className="col-md-2 text-end"> 
-                                 <button type="button" className="btn p-0 me-2 "
-                                data-bs-toggle="modal" data-bs-target="#listModal"> 
-                                <i className="bi bi-list"></i>
-                                </button> 
-
-                                <button type="button" className="btn p-0 me-2 "
-                                data-bs-toggle="modal" data-bs-target="#exampleModal" 
-                                data-bs-whatever="@mdo"> 
-                                    {/* <i className="bi bi-pencil fs-4"></i> */}
-                                    <i className="bi bi-plus-lg"></i> 추가 </button>  
-                                     
-                            </div>  
-                        </div> 
-                    </div> 
-                    <div className="card-body"> 
-                            <div className="row g-3">  
-                                <div className="col-2">창세기</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-success" style={{width: "75%"}}>75%</div>
-                                    </div> 
-                                </div>  
-                            </div>  
-
-                            <div className="row g-3">  
-                                <div className="col-2">출애굽기</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-info" style={{width: "15%"}}>15%</div>
-                                    </div> 
-                                </div> 
-                            </div>  
-
-
-                            <div className="row g-3">  
-                                <div className="col-2">마태복음</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-warning" style={{width: "55%"}}>55%</div>
-                                    </div> 
-                                </div> 
-                            </div>  
-
-                             <div className="row g-3">  
-                                <div className="col-2">요한복음</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-danger" style={{width: "95%"}}>95%</div>
-                                    </div> 
-                                </div> 
-                            </div> 
-                        
-                    </div>
-                </div>
-                    
-            </div>
-
-
-            <div className="col-lg-9">  
-                <div className="card mb-4 rounded-3 shadow-sm">
-                    <div className="card-header py-3"> 
-                    <h5 className="my-0 fw-normal">완료목록  </h5>
-                    </div>
-                    <div className="card-body"> 
-                            <div className="row g-3">  
-                                <div className="col-2">창세기</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-primary-subtle text-primary-emphasis" style={{width: "100%"}}>2025.01.30 ~ 2026.01.30</div>
-                                    </div> 
-                                </div> 
-                               
-                            </div>  
-
-                            <div className="row g-3">  
-                                <div className="col-2">출애굽기</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-primary-subtle text-primary-emphasis" style={{width: "100%"}}>2025.01.30 ~ 2026.01.30</div>
-                                    </div> 
-                                </div> 
-                            </div>  
-
-
-                            <div className="row g-3">  
-                                <div className="col-2">마태복음</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-primary-subtle text-primary-emphasis" style={{width: "100%"}}>2025.01.30 ~ 2026.01.30</div>
-                                    </div> 
-                                </div> 
-                            </div>  
-
-                             <div className="row g-3">  
-                                <div className="col-2">요한복음</div>
-                                <div className="col-10">
-                                    <div className="progress" role="progressbar" aria-label="Warning example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div className="progress-bar bg-primary-subtle text-primary-emphasis" style={{width: "100%"}}>2025.01.30 ~ 2026.01.30</div>
-                                    </div> 
-                                </div> 
-                            </div> 
-                        
-                    </div>
-                </div>
-                    
-            </div>
+            <PlanBookTodo 
+            planId={selectedPlan.planId}  
+            versionId={selectedPlan.versionId}
+            refreshList={loadData}
+            /> 
         </div>
-
-        {/* modal0  start */} 
-        { show == true  
-        // <div className="modal fade" id="planModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        //     <div className="modal-dialog modal-dialog-centered">
-        //         <div className="modal-content">
-                    
-        //             <div className="modal-header">
-        //                 <h1 className="modal-title fs-5" id="exampleModalLabel">성경</h1>
-        //                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        //             </div>
-        //             <div className="modal-body">
-        //                 <form>  
-        //                      <div className="mb-3"> 
-        //                         <label htmlFor="bibleVersion" className="col-form-label">성경  
-        //                         </label> 
-        //                         <select className="form-select"  
-        //                         name="versionId" 
-        //                         onChange={handleChangePlan}
-        //                         value={planForm.versionId}>  
-        //                         <option value="KSKJB">표준 킹제임스성경</option>
-        //                         <option value="KJVKO">킹제임스흠정역</option>
-        //                         <option value="NKRV">개역개정</option>
-        //                         </select>
-        //                     </div>   
-
-        //                     <div className="mb-3"> 
-        //                         <label htmlFor="cal1" className="col-form-label">제목 {errorPlan.title && (
-        //                             <span className="text-danger ms-2" style={{ fontSize: '0.9rem' }}>제목을 입력해주세요.</span>)}
-        //                         </label>   
-        //                         <input type="text" className="form-control" 
-        //                         name="title"
-        //                         value={planForm.title}
-        //                         onChange={handleChangePlan} />   
-        //                     </div>
-
-        //                      <div className="mb-3"> 
-        //                         <label htmlFor="cal1" className="col-form-label">시작일</label>  
-        //                         <input type="date" className="form-control" 
-        //                         name="startDt"
-        //                         value={planForm.startDt}
-        //                         onChange={handleChangePlan} />  
-        //                     </div> 
  
-
-        //                 </form>
-        //             </div>
-        //             <div className="modal-footer">
-        //                 <button type="button" className="btn btn-secondary" onClick={handleClose}>닫기</button>
-        //                 <button type="button" className="btn btn-primary" onClick={onClickSavePlan}>저장</button>
-        //             </div>
-        //         </div>
-        //     </div>
-        // </div>
-        }
-        {/* modal0  end */} 
-
-        {/* modal1  start */}  
-        <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                    
-                    <div className="modal-header">
-                        <h1 className="modal-title fs-5" id="exampleModalLabel">성경</h1>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div className="modal-body">
-                        <form> 
-
-                            {/* <div className="mb-3 row">
-                            <label for="staticEmail" className="col-sm-2 col-form-label">Email</label>
-                            <div className="col-sm-10">
-                            <input type="text" readonly className="form-control-plaintext" id="staticEmail" value="email@example.com"></input>
-                            </div>
-                            </div>
-                            <div className="mb-3 row">
-                            <label for="inputPassword" className="col-sm-2 col-form-label">Password</label>
-                            <div className="col-sm-10">
-                            <input type="password" className="form-control" id="inputPassword"></input>
-                            </div>
-                            </div> */}
-
-
-                             <div className="mb-3"> 
-                                <label htmlFor="bibleVersion" className="col-form-label">성경</label>  
-                                <select className="form-select" id="bibleVersion"> 
-                                <option value="1">표준 킹제임스성경</option>
-                                <option value="2">킹제임스흠정역</option>
-                                <option value="3">개역개정</option>
-                                </select>
-                            </div> 
-
-                            <div className="mb-3"> 
-                                <label htmlFor="recipient-name3" className="col-form-label">신/구약</label> 
-                                <select className="form-select" id="recipient-name3" aria-label="Default select example"> 
-                                <option value="1" defaultValue>신약</option>
-                                <option value="2">구약</option> 
-                                </select> 
-                            </div>
-
-                             <div className="mb-3"> 
-                                <label htmlFor="recipient-name34" className="col-form-label">책</label> 
-                                <select className="form-select" id="recipient-name34" aria-label="Default select example"> 
-                                <option value="1" defaultValue>마태복음</option>
-                                <option value="2">마가복음</option> 
-                                <option value="2">누가복음</option> 
-                                </select>
-                            </div> 
-
-                            <div className="mb-3">
-                                <label htmlFor="chapter-input" className="form-label d-block">장</label>
-                                <div className="d-flex align-items-center">
-                                    <input type="text" className="form-control" id="chapter-start" placeholder="1" style={{ width: '100px' }} /> 장
-                                    <span className="mx-2">-</span>
-                                    <input type="text" className="form-control" id="chapter-end" placeholder="1" style={{ width: '100px' }} /> 장
-                                </div>
-                            </div> 
  
-
-                             <div className="mb-3"> 
-                                <label htmlFor="cal1" className="col-form-label">시작일</label>  
-                                <input type="date" id="cal1" className="form-control" />  
-                            </div>
-                             <div className="mb-3"> 
-                                <label htmlFor="cal1" className="col-form-label">완료일</label>  
-                                <input type="date" id="cal1" className="form-control" />  
-                            </div> 
-
-                            
-                        </form>
-                    </div>
-                    <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                        <button type="button" className="btn btn-primary">저장</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {/* modal1  end */} 
 
         {/* modal2  start */} 
         <div className="modal fade" id="listModal" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -535,9 +305,7 @@ return (
                 </div>
             </div>
         </div>
-        {/* modal2  end */} 
-
-
+        {/* modal2  end */}  
     </div> 
 );
     

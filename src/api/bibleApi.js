@@ -29,6 +29,11 @@ export const BibleApi = {
     const res = await api.delete(`${API_URL}/verse/${id}`);
     return res;
   },
+  getBooks: async(versionId) =>{
+    
+    const res = await api.get(`${API_URL}/books`, {params : {versionId},});
+    return res.data;
+  }
 };
 
 
