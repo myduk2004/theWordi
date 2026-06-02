@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";  
 import { todayYMD } from '../../util/common.js';
 import { readingPlanApi } from "../../api/readingPlanApi";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";  
+import { Modal, Button, Form, Row, Col, InputGroup, ListGroup, Badge } from "react-bootstrap";  
 import PlanBookTodo from "../../components/PlanBookTodo"; 
 
 const ReadingPlanForm = () =>{
@@ -21,26 +21,38 @@ const [errorPlan, setErrorPlan] = useState({
  
 const [plans, setPlans] = useState([]);
 const [selectedPlan, SetSelectedPlan] = useState({
-    planId :18, 
-    versionId : "KSKJB"
+    planId :0, 
+    versionId : "", 
+    readCount : 0, 
+    title : "" 
 });
 
 const loadData = async(planId, versionId) => {
     try 
     { 
         const list = await readingPlanApi.getAll();              
-        setPlans(list);  
-
-        //선택된 계획 처리(저장,수정,삭제 & 책 읽기 등록 후 갱신)
-        if (planId == null || versionId == null)
-        {
-           planId = list?.at(-1)?.planId??0;
-           versionId = list?.at(-1)?.versionId??""
+        setPlans(list);   
+ 
+        //case1: plan 이 삭제, 새로 저장 시 -> 마지막 Row 선택 
+        //case2: plan 이 update, book 새로저장/삭제/update 시 --> 기존 Row 선택  
+        let selected_planId = selectedPlan.planId;
+        let selected_versionId = selectedPlan.versionId; 
+        let selected_readCount = selectedPlan.readCount;   
+        if (planId == 0 || planId != selectedPlan.planId)
+        { 
+            //처음 plan 등록시  selectedPlan.planId <> new_plan_id
+            //row 선택된 상태에서 새로 plan 등록시 selectedPlan.planId <> new_plan_id
+            //plan 삭제 후 plan_id=0, selectedPlan.planId > 0         
+            selected_planId = list?.at(-1)?.planId??0;
+            selected_versionId = list?.at(-1)?.versionId??""; 
+            selected_readCount = list?.at(-1)?.readCount??0;   
         }
-        
+ 
+
         SetSelectedPlan({
-            planId : planId, 
-            versionId : versionId 
+            planId : selected_planId, 
+            versionId : selected_versionId,
+            readCount : selected_readCount  
         });   
     }
     catch(err)
@@ -49,8 +61,8 @@ const loadData = async(planId, versionId) => {
     }  
 }
 
-useEffect(()=>{  
-    loadData(null, null);
+useEffect(()=>{    
+      loadData(0, ""); 
 }, [])
 
 const onClickSavePlan = async() =>{   
@@ -70,11 +82,13 @@ const onClickSavePlan = async() =>{
        let res;
         if (planForm.planId === null) {
             res = await readingPlanApi.create(planForm); 
-            loadData(null, planForm.versionId); 
+            loadData(res.planId, planForm.versionId); 
+            alert("저장되었습니다.");
         } else {
             await readingPlanApi.update(planForm);
             loadData(planForm.planId, planForm.versionId);
-        }
+            alert("수정되었습니다.");
+        } 
     }
     catch(err)
     {
@@ -94,18 +108,18 @@ const handleChangePlan = (e) =>{
 
 
 const handleShow = () => setShow(true);
-
-const handleClose = (e) =>{
-    setShow(false); 
-    setErrorPlan({versionId : false, title :  false, startDt : false}); 
-     
+ 
+const onClickEditPlan = (plan) => {
     setPlanForm({
-        planId : null,
-        versionId : "KSKJB", 
-        title : "", 
-        startDt : todayYMD()
-    });
-}
+        planId : plan.planId,
+        versionId : plan.versionId, 
+        title : plan.title, 
+        startDt : plan.startDt
+    }); 
+
+    handleShow();
+};
+
 
 const handleEdit = (planId, versionId, title, startDt) =>{ 
  
@@ -119,14 +133,27 @@ const handleEdit = (planId, versionId, title, startDt) =>{
     handleShow();
 } 
 
+const handleClose = (e) =>{
+    setShow(false); 
+    setErrorPlan({versionId : false, title :  false, startDt : false}); 
+     
+    setPlanForm({
+        planId : null,
+        versionId : "KSKJB", 
+        title : "", 
+        startDt : todayYMD()
+    });
+}
+
+
 const handleDelete = async() =>{
     if (planForm.planId == null || planForm.planId < 1) return;
-    if (!confirm("삭제하시겠습니까?")) return;
+    if (!confirm("삭제하시겠습니까? 등록된 책의 진행/완료 목록이 함께 삭제됩니다.")) return;
 
     try 
     {
         await readingPlanApi.delete(planForm.planId);
-        loadData(null, null);  
+        loadData(0, "");  
     }
     catch(err)
     {
@@ -153,15 +180,16 @@ return (
                             <div className="card-header text-bg-primary border-primary"> 
                                  <div className="row g-3 align-items-center">
                                     <div className="col-md-9">
-                                        <h5 className="my-0 fw-normal">성경 4번째 읽기</h5> 
+                                        <h5 className="my-0 fw-normal">성경 {selectedPlan.readCount}번째 읽기</h5> 
                                         <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            3+
-                                            <span> 진행중</span> 
+                                                {(plans.filter(d => d.status === "PROCEEDING" )?.length??0)}
+                                               {(plans.filter(d => d.status === "PROCEEDING" )?.length??0) && 
+                                               <span>+건 진행중</span>}  
                                         </span>
                                     </div>
                                     <div className="col-md-3 text-end"> 
                                         <button type="button" className="btn p-0 me-2 text-white" onClick={handleShow}>
-                                            <i className="bi bi-pencil fs-4"></i> 시작하기
+                                            <i className="bi bi-pencil fs-4"></i> 계획 시작하기
                                         </button> 
                                     </div> 
                                     {/* --- React Bootstrap Modal 영역 --- */}
@@ -179,6 +207,7 @@ return (
                                                         value={planForm.versionId} 
                                                         onChange={handleChangePlan}
                                                         isInvalid={errorPlan.versionId}
+                                                        style={planForm.planId > 0?{ pointerEvents: 'none', backgroundColor: '#f8f9fa' } : null}
                                                     >
                                                         <option value="KSKJB">표준 킹제임스성경</option>
                                                         <option value="KJVKO">킹제임스흠정역</option>
@@ -208,6 +237,7 @@ return (
                                                         value={planForm.startDt} 
                                                         onChange={handleChangePlan}
                                                         isInvalid={errorPlan.startDt}
+                                                        style={planForm.planId > 0?{ pointerEvents: 'none', backgroundColor: '#f8f9fa' } : null}
                                                     />
                                                 </Form.Group>
                                             </Form>
@@ -215,32 +245,68 @@ return (
 
                                         <Modal.Footer>
                                             <Button variant="secondary" onClick={handleClose}>닫기</Button>                                            
-                                            <Button variant="primary" onClick={onClickSavePlan}>저장</Button>
+                                            <Button variant="primary" onClick={onClickSavePlan}>저장</Button> 
                                             <Button variant="danger" size="sm" onClick={handleDelete}><i className="bi bi-trash me-1"></i> 삭제</Button>
                                         </Modal.Footer>
                                     </Modal>   
                                  </div>
-                            </div>
-                            <div className="card-body">  
-                                {plans != null && plans.map((d, index) => {
+                            </div>  
 
-                                    const progress = d.bookCount == 0?0:(d.bookCount/66 * 100).toFixed(1);
-                                   
-                                    return (
-                                    <div className="row g-3 mb-2 flex-nowrap align-items-center" key={d.planId}>  
-                                        <div className="col-2 text-nowrap" 
-                                        style={{cursor: 'pointer'}} 
-                                        onClick={() => handleEdit(d.planId, d.versionId, d.title, d.startDt)}>{index+1}회차</div>
-                                        <div className="col-auto text-nowrap">{d.startDt} ~ {d.endDt}</div>  
-                                        <div className="col-2 text-nowrap text-primary">{progress}% 
-                                            {d.status === "PROCEEDING" && <span className="badge text-bg-info"><i className="bi bi-person-walking"></i>진행중</span>}
-                                            {d.status === "ABANDONED" && <span className="badge text-bg-warning"><i className="bi bi-person-walking"></i>중단</span>}
-                                        </div>   
-                                    </div> 
-                                    )
-                                })} 
+                            <ListGroup variant="flush"> 
+                                {plans.map((d, index) => {
+                                    const progress = d.bookCount == 0?0:(d.bookCount/66 * 100).toFixed(1); 
 
-                            </div>
+                                    const isActive = selectedPlan?.planId === d.planId;
+                                    return ( 
+                                        <ListGroup.Item 
+                                            key={index}
+                                            action 
+                                            active={isActive}
+                                            as="button" 
+                                            type="button" 
+                                            onClick={() =>SetSelectedPlan({
+                                                planId : d.planId, 
+                                                versionId : d.versionId , 
+                                                readCount : d.readCount
+                                            })} 
+                                            className="w-100 border-0 px-4 py-3 custom-hover-item border-bottom"
+                                        >  
+                                            <div className="row w-100 m-0 align-items-center">
+                                                <span className="col-2 text-start fw-medium p-0">{index + 1}회차</span>
+                                                <span className="col-4 text-start small p-0">{d.startDt} ~ {d.endDt}</span> 
+                                                <span className="col-4 text-end small p-0">{progress}%</span> 
+                                                <span className="col-2 text-end small p-0">  
+                                                    {/* <a className="icon-link icon-link-hover link-success link-underline-success link-underline-opacity-25" 
+                                                    onClick={() => handleShow(d.planBookId, d.bookId, d.maxChapterNum)}>
+                                                    edit
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="bi" viewBox="0 0 16 16" aria-hidden="true">
+                                                        <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                                                    </svg>
+                                                    </a> */}
+                                                    <div className="d-inline-flex align-items-center gap-2"> 
+                                                        <button 
+                                                            type="button" 
+                                                            className="btn border-0 d-flex align-items-center justify-content-center p-0"
+                                                            style={{ 
+                                                            width: '24px', 
+                                                            height: '24px', 
+                                                            backgroundColor: '#e7f1ff', 
+                                                            color: '#0d6efd',
+                                                            borderRadius: '4px',
+                                                            flexShrink: 0 
+                                                            }}
+                                                            value={d.bookId}
+                                                            onClick={() => onClickEditPlan(d)}
+                                                        > 
+                                                            <i className="bi bi-pencil-fill" style={{ fontSize: '0.7rem' }}></i>
+                                                        </button> 
+                                                    </div>  
+                                                </span>  
+                                            </div> 
+                                        </ListGroup.Item>
+                                    )} 
+                                )} 
+                            </ListGroup> 
                         </div>
                     </div>
                 </div> 
@@ -249,63 +315,10 @@ return (
             <PlanBookTodo 
             planId={selectedPlan.planId}  
             versionId={selectedPlan.versionId}
+            readCount={selectedPlan.readCount}
             refreshList={loadData}
             /> 
-        </div>
- 
- 
-
-        {/* modal2  start */} 
-        <div className="modal fade" id="listModal" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div className="modal-content">
-                <div className="modal-header">
-                    <h1 className="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                            
-                <div className="modal-body p-0"> 
-                <div className="d-flex px-4 py-2 bg-light border-bottom">
-                    <span className="flex-fill text-uppercase text-muted" style={{fontSize:"11px", letterSpacing:".06em"}}>A</span>
-                    <span className="flex-fill text-uppercase text-muted" style={{fontSize:"11px", letterSpacing:".06em"}}>B</span>
-                    <span className="flex-fill text-uppercase text-muted" style={{fontSize:"11px", letterSpacing:".06em"}}>C</span>
-                    <span className="flex-fill text-uppercase text-muted" style={{fontSize:"11px", letterSpacing:".06em"}}>D</span>
-                </div>
-
-                
-                <ul className="list-group list-group-flush">
-                    <li className="list-group-item list-group-item-action d-flex align-items-center">
-                    <span className="flex-fill">항목 1</span>
-                    <span className="flex-fill">값 B-1</span>
-                    <span className="flex-fill"><span className="badge rounded-pill text-bg-primary">진행중</span></span>
-                    <span className="flex-fill text-muted small">2024.01.01</span>
-                    </li>
-                    <li className="list-group-item list-group-item-action d-flex align-items-center">
-                    <span className="flex-fill">항목 2</span>
-                    <span className="flex-fill">값 B-2</span>
-                    <span className="flex-fill"><span className="badge rounded-pill text-bg-success">완료</span></span>
-                    <span className="flex-fill text-muted small">2024.02.15</span>
-                    </li>
-                    <li className="list-group-item list-group-item-action d-flex align-items-center">
-                    <span className="flex-fill">항목 3</span>
-                    <span className="flex-fill">값 B-3</span>
-                    <span className="flex-fill"><span className="badge rounded-pill text-bg-warning">대기</span></span>
-                    <span className="flex-fill text-muted small">2024.03.08</span>
-                    </li>
-                    
-                </ul>
-
-                </div>
-
-
-                <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" className="btn btn-primary">Understood</button>
-                </div>
-                </div>
-            </div>
-        </div>
-        {/* modal2  end */}  
+        </div> 
     </div> 
 );
     

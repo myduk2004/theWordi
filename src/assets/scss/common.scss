@@ -11211,11 +11211,23 @@ section {
   padding-bottom: 2px;
   display: inline-block;
 }
-
-/* 리스트 아이템 호버 시 하늘색 적용 */
+ 
+ 
+/* 1. 마우스를 올렸을 때 (Hover) */
 .custom-hover-item:hover {
-  background-color: #e3f2fd !important; /* 연한 하늘색 */
-  transition: background-color 0.2s ease;
+    background-color: #F4F6F9 !important; 
+    color: #0056b3 !important;            
 }
- 
- 
+
+/* 2. [수정] 오직 React에서 .active 클래스가 붙어있을 때만 색상 고정 */
+.custom-hover-item.active {
+    background-color: #e6f0fa !important; 
+    border-color: #e6f0fa !important;
+    color: #0056b3 !important;            
+}
+
+/* 3. [선택] 클릭 시 일시적으로 생기는 부트스트랩 기본 검은색 테두리(아웃라인) 제거 */
+.custom-hover-item:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
