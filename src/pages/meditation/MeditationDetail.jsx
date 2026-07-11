@@ -5,6 +5,7 @@ import  EditorView  from "../../components/EditorView";
 import { MeditationApi } from "../../api/meditationApi"; 
 import { formatDateKr } from '../../util/common.js';
 
+
 const MeditationDetail = () => { 
     const navigate = useNavigate(); 
     const { meditationId } = useParams();

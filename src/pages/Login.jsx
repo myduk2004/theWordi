@@ -32,7 +32,7 @@ export default function Login() {
       });
 
       const data = await res.data;
- 
+
       contextLogin(
         {
           id: data.userId,
@@ -56,13 +56,8 @@ export default function Login() {
 
   return (
     <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-      <div
-        className="card shadow-sm p-4"
-        style={{ width: "100%", maxWidth: "500px" }}
-      >
-        <h3 className="text-center mb-4 text-primary fw-bold">
-          theWord.I 로그인
-        </h3>
+      <div className="card shadow-sm p-4" style={{ width: "100%", maxWidth: "500px" }}>
+        <h3 className="text-center mb-4 text-primary fw-bold">theWord.I 로그인</h3>
 
         <form onSubmit={handleLogin}>
           <div className="mb-3">
@@ -110,10 +105,7 @@ export default function Login() {
           >
             <FaGoogle size={14} />
           </button>
-          <button
-            className="btn btn-naver btn-sm mx-1"
-            onClick={() => handleSocialLogin("naver")}
-          >
+          <button className="btn btn-naver btn-sm mx-1" onClick={() => handleSocialLogin("naver")}>
             <SiNaver size={14} />
           </button>
           <button className="btn btn-kakao btn-sm mx-1">
