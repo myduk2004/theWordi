@@ -3,7 +3,7 @@ import { Form } from 'react-bootstrap';
 import { BibleApi } from "../api/bibleApi";
 
 
-const initBookId = 1;           //bookID 초기값은 1(창세기)로 설정
+//const initBookId = 1;           //bookID 초기값은 1(창세기)로 설정
 const initTestament = "OLDT";   //testament 초기값은 '구약'으로 설정
 
 //없으면 bookId = null로 있으면 bookID는 있는값으로 
@@ -11,7 +11,8 @@ const BibleBookSelect = ({ versionId, bookId, onChange }) => {
 
 const [books, setBooks] = useState([]); 
 const [testament, setTestament] = useState(initTestament);
-const [selectedBookId, setSelectedBookId] = useState(bookId);
+//const [selectedBookId, setSelectedBookId] = useState(bookId);
+const [selectedBookId, setSelectedBookId] = useState(bookId ?? "");
 
 useEffect(()=>{
 
@@ -104,7 +105,9 @@ const handleBookChange = (e) => {
 
 //Book 선택 시 값 설정 및 부모창 이벤트호출
 const handleSelected = (val, e) =>{ 
-    setSelectedBookId(val);  
+    //setSelectedBookId(val);  
+    setSelectedBookId(val??"");  
+
     if (e != null)
     {
         onChange(e); 
@@ -155,7 +158,7 @@ return (
         <Form.Label>성경책</Form.Label>
         <Form.Select 
             name="bookId"  
-            value={selectedBookId}
+            value={selectedBookId??""}
             onChange={handleBookChange}  
             style={bookId > 0?{ pointerEvents: 'none', backgroundColor: '#f8f9fa' } : null}
         >

@@ -1,6 +1,6 @@
 import { useState, useEffect, useReducer } from "react";
 const BibleList = ({verses = [], onDelete}) => { 
- console.log(verses);
+ 
   const onClickDelete = (id)=>{
     onDelete(id);
   };

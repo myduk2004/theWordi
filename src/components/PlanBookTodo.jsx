@@ -5,7 +5,7 @@ import { todayYMD } from '../util/common.js';
 import { readingBookApi } from "../api/readingBookApi";
  
 //const initBookId = 1;
-const initBookId = null;
+const initBookId = "";
 const initForm = {   
     planBookId : null,
     bookId:initBookId, 

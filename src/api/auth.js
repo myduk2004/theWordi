@@ -3,7 +3,7 @@ import axios from "axios";
 export async function refreshAccessToken() {
 
   try {
-      const res = await axios.post("/jwt/refresh", {}, { withCredentials: true });
+      const res = await axios.post(`import.meta.env.VITE_BACKEND_API_BASE_URL/jwt/refresh`, {}, { withCredentials: true });
       if (!res.data?.accessToken) 
       {
         return Promise.reject({

@@ -2,7 +2,8 @@ import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-const MainLayout = ({ children }) => {
+import { Outlet, Link } from "react-router-dom"; 
+  const MainLayout = () => {
   const { pathname } = useLocation();
   const [header, setHeader] = useState({
     bgCss: "",
@@ -19,7 +20,7 @@ const MainLayout = ({ children }) => {
         bgCss: "bg-primary text-white",
         title: "하나님의 말씀",
         subTitle:
-          "태초에 말씀이 계셨고, 그 말씀이 하나님과 함께 계셨으니, 그 말씀은 하나님이셨느니라.",
+          "태초에 말씀이 계셨고1, 그 말씀이 하나님과 함께 계셨으니, 그 말씀은 하나님이셨느니라.",
       });
     } else if (pathname.startsWith("/bible/compare")) {
       setHeader({
@@ -47,8 +48,8 @@ const MainLayout = ({ children }) => {
 
   return (
     <div>
-      <Header header={header}></Header>
-      {children}
+      <Header header={header}></Header> 
+      <Outlet />
       <Footer></Footer>
     </div>
   );

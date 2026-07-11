@@ -262,8 +262,9 @@ return (
                                             key={index}
                                             action 
                                             active={isActive}
-                                            as="button" 
-                                            type="button" 
+                                            as="div" 
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() =>SetSelectedPlan({
                                                 planId : d.planId, 
                                                 versionId : d.versionId , 
@@ -296,7 +297,11 @@ return (
                                                             flexShrink: 0 
                                                             }}
                                                             value={d.bookId}
-                                                            onClick={() => onClickEditPlan(d)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onClickEditPlan(d); 
+                                                                }
+                                                            }
                                                         > 
                                                             <i className="bi bi-pencil-fill" style={{ fontSize: '0.7rem' }}></i>
                                                         </button> 
