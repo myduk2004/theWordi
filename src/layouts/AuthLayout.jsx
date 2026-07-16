@@ -1,12 +1,10 @@
-
 import Footer from "../components/Footer";
 import { Outlet, Link } from "react-router-dom";
 
-const AuthLayout = () => {  
+const AuthLayout = () => {
   return (
-    <div>  
-       <Outlet />
-      <Footer></Footer>
+    <div>
+      <Outlet />
     </div>
   );
 };

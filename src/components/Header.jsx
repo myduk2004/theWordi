@@ -6,10 +6,10 @@ import "./Header.css";
 import { useUser } from "../contexts/UserContext";
 
 const Header = ({ header }) => {
-  const { bgCss, title, subTitle } = header;
+  const { bgCss, title, sub_title, source } = header;
   const [err, setErr] = useState("");
   const { user, contextLogout } = useUser();
- 
+
   const handleLogout = async () => {
     try {
       const res = await api.post("/logout");
@@ -22,14 +22,11 @@ const Header = ({ header }) => {
 
   return (
     <>
-      <nav
-        className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top"
-        id="mainNav"
-      >
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
         <div className="container px-4">
           <Link className="navbar-brand" to="/">
             TheWord.I
-          </Link> 
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
@@ -44,11 +41,11 @@ const Header = ({ header }) => {
           <div className="collapse navbar-collapse" id="navbarResponsive">
             <ul className="navbar-nav ms-auto">
               {user.role?.includes("ADMIN") && (
-              <li className="nav-item">
-                <Link className="nav-link" to="/bible/create">
-                  성경쓰기
-                </Link>
-              </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/bible/create">
+                    성경쓰기
+                  </Link>
+                </li>
               )}
 
               <li className="nav-item">
@@ -56,44 +53,39 @@ const Header = ({ header }) => {
                   성경검색
                 </Link>
               </li>
- 
-            {user.isLogin && (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/meditations">
-                    묵상
-                  </Link>
-                </li> 
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/readingPlan">
-                    읽기계획표
-                  </Link>
-                </li> 
-                
-                <li className="nav-item">
-                  <Link className="nav-link" to="/">
-                    {user.name}님 환영합니다.
-                  </Link>
-                </li>
-              </>
+              {user.isLogin && (
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/meditations">
+                      묵상
+                    </Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/readingPlan">
+                      읽기계획표
+                    </Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/">
+                      {user.name}님 환영합니다.
+                    </Link>
+                  </li>
+                </>
               )}
-                
+
               <li className="nav-item">
                 {user.isLogin ? (
                   <Link className="nav-link" to="/">
-                    <button
-                      onClick={handleLogout}
-                      className="btn btn-outline-danger ms-2 btn-sm"
-                    >
+                    <button onClick={handleLogout} className="btn btn-outline-danger ms-2 btn-sm">
                       로그아웃{" "}
                     </button>
                   </Link>
                 ) : (
                   <Link className="nav-link" to="/login">
-                    <button className="btn btn-primary ms-2 btn-sm">
-                      로그인
-                    </button>
+                    <button className="btn btn-primary ms-2 btn-sm">로그인</button>
                   </Link>
                 )}
               </li>
@@ -104,11 +96,35 @@ const Header = ({ header }) => {
       {/* <!-- Header--> */}
       <header className={`${bgCss} bg-gradient`}>
         <div className="container px-4 text-center">
-          <h1 className="fw-bolder">{title}</h1>
-          <p className="lead">{subTitle}</p>
-          <Link className="btn btn-lg btn-light" to="/bible/search">
-            Start Search!
-          </Link>
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "800px",
+              margin: "0 auto",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "1.4rem",
+                fontWeight: 530,
+                textAlign: "center",
+                marginBottom: "8px",
+              }}
+            >
+              {title}
+            </p>
+
+            <div
+              style={{
+                textAlign: "right",
+                fontSize: "0.9rem",
+                color: "#ddd",
+                fontStyle: "italic",
+              }}
+            >
+              - {source}
+            </div>
+          </div>
         </div>
       </header>
     </>
