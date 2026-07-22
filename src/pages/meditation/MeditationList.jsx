@@ -43,7 +43,8 @@ const MeditationList = () => {
     try {
       const searchParam = {
         title: searchOption.searchItem === "title" ? searchOption.keyword : "",
-        text: searchOption.searchItem === "text" ? searchOption.keyword : "",
+        bibleText: searchOption.searchItem === "bibleText" ? searchOption.keyword : "",
+        etcText: searchOption.searchItem === "etcText" ? searchOption.keyword : "",
         startDate: searchOption.startDate,
         endDate: searchOption.endDate,
       };
@@ -97,8 +98,8 @@ const MeditationList = () => {
           <div className="row mb-2">
             <div className="col">
               <h4>
-                <i className="bi bi-lightbulb text-warning fs-3"></i> 묵상{" "}
-              </h4>{" "}
+                <i className="bi bi-lightbulb text-warning fs-3"></i> 묵상
+              </h4>
             </div>
           </div>
         </div>
@@ -117,7 +118,8 @@ const MeditationList = () => {
                         onChange={onChange}
                       >
                         <option value="title">제목</option>
-                        <option value="content">본문</option>
+                        <option value="bibleText">성경 묵상구절</option>
+                        <option value="etcText">성경외 묵상구절</option>
                       </select>
                     </div>
                     <div className="col-md-4">
@@ -197,17 +199,19 @@ const MeditationList = () => {
                         {d.title.length > 10 ? d.title.substring(0, 30) + "..." : d.title}
                       </h6>
                     </div>
-                    <div className="card-body  d-flex flex-column">
-                      <ul className="list-unstyled mt-3 mb-4 flex-grow-1">
-                        <li>
-                          <div
-                            className="tiptap-viewer"
-                            dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(d.text, sanitizeConfig),
-                            }}
-                          ></div>
-                        </li>
-                      </ul>
+                    <div
+                      className="card-body  d-flex flex-column"
+                      style={{ whiteSpace: "pre-line" }}
+                    >
+                      <small className="mb-2">
+                        {d.bibleText.length > 200
+                          ? d.bibleText.substring(0, 200) + "..."
+                          : d.bibleText}
+                      </small>
+
+                      <small className="mb-4">
+                        {d.etcText.length > 200 ? d.etcText.substring(0, 200) + "..." : d.etcText}
+                      </small>
 
                       <button
                         type="button"

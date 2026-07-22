@@ -16,6 +16,8 @@ const MeditationForm = () => {
   const [form, setForm] = useState({
     meditationDt: todayYMD(),
     title: "",
+    etcText: "",
+    etcSource: "",
   });
   const [content, setContent] = useState("");
   const [errors, setErrors] = useState({
@@ -28,10 +30,21 @@ const MeditationForm = () => {
     const loadData = async () => {
       try {
         const data = await MeditationApi.getOne(meditationId);
+
+        if (data.bibleVerses != null) {
+          const myVerses = data.bibleVerses
+            .filter((v) => v.verses && v.verses.length > 0)
+            .flatMap((v) => v.verses);
+          setVerses(myVerses);
+        }
+
         setForm({
           meditationDt: data.meditationDt,
           title: data.title,
+          etcText: data.etcText,
+          etcSource: data.etcSource,
         });
+
         setContent(data.text || "");
       } catch (err) {
         console.error("데이터 로드 실패 : ", err);
@@ -49,18 +62,33 @@ const MeditationForm = () => {
     if (loading) return;
 
     const currentContent = editorRef.current?.getHTML() || "";
-    const verseIds = [];
-    let match;
 
     if (!validate(currentContent)) {
       return;
     }
 
+    const bibleText = verses
+      .map((v) => `${v.text} (${v.bookName} ${v.chapter}:${v.verse})`)
+      .join("\n");
+
+    const verseIds = verses.map((v) => v.verseId);
+
+    if (
+      (verseIds == null || verseIds.length < 1) &&
+      (form.etcText === "" || form.etcSource === "")
+    ) {
+      alert(
+        "묵상구절을 입력해 주세요.\n'성경 묵상구절' 또는 '묵상구절(성경 외)' 중 하나는 반드시 입력해야 합니다."
+      );
+      return;
+    }
+
     const formData = {
       ...form,
+      bibleText: bibleText,
       text: currentContent,
       ...(meditationId && { meditationId }),
-      verseIds,
+      verseIds: verseIds,
     };
 
     try {
@@ -92,10 +120,10 @@ const MeditationForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const addVerse = ({
@@ -135,7 +163,7 @@ const MeditationForm = () => {
         <div className="row gx-4 justify-content-center">
           <div className="col-lg-9 mb-2">
             <h4>
-              <i className="bi bi-lightbulb"></i> 묵상
+              <i className="bi bi-lightbulb text-warning fs-3"></i> 묵상
             </h4>
           </div>
 
@@ -166,14 +194,17 @@ const MeditationForm = () => {
                     />
                   </div>
 
+                  <div className="col-md-12 mt-4">
+                    묵상구절<small className="text-primary fst-italic"> - 성경</small>
+                  </div>
                   <BibleSearch onSelect={addVerse}></BibleSearch>
 
                   <div className="col-md-12">
-                    <label htmlFor="exampleFormControlTextarea1" className="form-label">
-                      성경 묵상구절
-                    </label>
-
                     <div className="bd-callout bd-callout-info">
+                      {verses.length === 0 && (
+                        <span className="small text-muted">- 선택된 성경 묵상구절이 없습니다.</span>
+                      )}
+
                       {verses.map((v, index) => (
                         <div
                           key={index}
@@ -189,7 +220,9 @@ const MeditationForm = () => {
                             onMouseOver={(e) => (e.target.style.opacity = 0.7)}
                             onMouseOut={(e) => (e.target.style.opacity = 1)}
                             style={{ fontSize: "10px", cursor: "pointer" }}
-                            onClick={() => setVerses(verses.filter((d) => d.verseId !== v.verseId))}
+                            onClick={() =>
+                              setVerses((prev) => prev.filter((d) => d.verseId !== v.verseId))
+                            }
                           >
                             del
                           </span>
@@ -199,25 +232,25 @@ const MeditationForm = () => {
                   </div>
 
                   <div className="col-md-12">
-                    <div className="mb-3">
-                      <label htmlFor="exampleFormControlTextarea1" className="form-label">
-                        묵상구절
-                      </label>
+                    <small className="text-primary fst-italic"> - 성경 외의 묵상구절</small>
+                    <input
+                      type="text"
+                      className="form-control mb-3"
+                      name="etcSource"
+                      placeholder="출처"
+                      value={form.etcSource}
+                      onChange={handleChange}
+                    />
 
-                      <input
-                        type="text"
-                        className={`form-control mb-3`}
-                        name="etc_text_source"
-                        placeholder="출처"
-                      />
-
-                      <textarea
-                        className="form-control"
-                        id="exampleFormControlTextarea1"
-                        placeholder="묵상구절"
-                        rows="2"
-                      ></textarea>
-                    </div>
+                    <textarea
+                      className="form-control"
+                      id="etcText"
+                      name="etcText"
+                      placeholder="묵상구절"
+                      rows="2"
+                      value={form.etcText}
+                      onChange={handleChange}
+                    ></textarea>
                   </div>
 
                   <div className="col-md-12">
@@ -232,7 +265,7 @@ const MeditationForm = () => {
                       className="btn btn-primary me-2"
                       onClick={() => navigate(`/meditations`)}
                     >
-                      목록{" "}
+                      목록
                     </button>
                     <button type="button" onClick={handleSubmit} className="btn btn-primary">
                       저장
