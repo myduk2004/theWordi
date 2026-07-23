@@ -37,23 +37,22 @@ export const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const handleForceLogout = () => contextLogout();    
- 
-    window.addEventListener("force-logout", handleForceLogout);   
+    const handleForceLogout = () => contextLogout();
+
+    window.addEventListener("force-logout", handleForceLogout);
 
     //cleanup 함수 : 컴포넌트가 사라질떄 실행할 함수
     return () => window.removeEventListener("force-logout", handleForceLogout);
   }, []);
 
-
   useEffect(() => {
     const restoreUser = async () => {
-      const token = localStorage.getItem("accessToken");    
+      const token = localStorage.getItem("accessToken");
       if (!token) {
-        setLoading(false); 
+        setLoading(false);
         return;
       }
- 
+
       try {
         const res = await api.get("/user");
         setUser({
@@ -74,12 +73,10 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <div>로딩중 ...</div>;
+    return <div>로딩중1 ...</div>;
   }
 
-  return (
-    <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
-  );
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {
