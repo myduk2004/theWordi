@@ -40,9 +40,10 @@ const MainLayout = () => {
 
     return {
       bgCss: "bg-primary text-white",
-      title: "기본",
-      subTitle: "기본",
-      source: "기본",
+      title:
+        "그러나 주의 율법 안에 그의 큰 즐거움이 있으니,\n그가 그분의 율법을 주야로 묵상하는도다.",
+      subTitle: "",
+      source: "시편 1:2",
     };
   }, [pathname, headerTitles]);
 

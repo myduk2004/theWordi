@@ -109,6 +109,7 @@ const Header = ({ header }) => {
                 fontWeight: 530,
                 textAlign: "center",
                 marginBottom: "8px",
+                whiteSpace: "pre-line",
               }}
             >
               {title}
