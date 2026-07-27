@@ -108,7 +108,7 @@ export default function Login() {
           <button className="btn btn-naver btn-sm mx-1" onClick={() => handleSocialLogin("naver")}>
             <SiNaver size={14} />
           </button>
-          <button className="btn btn-kakao btn-sm mx-1">
+          <button className="btn btn-kakao btn-sm mx-1" onClick={() => handleSocialLogin("kakao")}>
             <RiKakaoTalkFill size={14} />
           </button>
         </div>
