@@ -2,6 +2,24 @@ import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { MeditationApi } from "../../api/meditationApi";
 import DOMPurify from "dompurify";
+
+const SKELETON_COUNT = 6;
+
+const MeditationCardSkeleton = () => (
+  <div className="col d-flex">
+    <div className="card mb-4 rounded-3 shadow-sm w-100 placeholder-glow">
+      <div className="card-header py-3 text-center">
+        <span className="placeholder col-6"></span>
+      </div>
+      <div className="card-body d-flex flex-column">
+        <span className="placeholder col-10 mb-2"></span>
+        <span className="placeholder col-7 mb-4"></span>
+        <span className="placeholder col-12 mt-auto" style={{ height: "44px" }}></span>
+      </div>
+    </div>
+  </div>
+);
+
 const MeditationList = () => {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
@@ -9,8 +27,12 @@ const MeditationList = () => {
   const observerRef = useRef(null);
   const [hasNext, setHasNext] = useState(true);
   const hasNextRef = useRef(true);
-  const [loading, setLoading] = useState(false);
+
+  // 첫 페이지(스켈레톤) 로딩과, 무한스크롤 추가 로딩을 분리
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [fetchingMore, setFetchingMore] = useState(false);
   const loadingRef = useRef(false);
+
   const [searchOption, setSearchOption] = useState({
     searchItem: "title",
     keyword: "",
@@ -38,7 +60,11 @@ const MeditationList = () => {
     if (!reset && !hasNextRef.current) return;
 
     loadingRef.current = true;
-    setLoading(true);
+    if (curPage === 0) {
+      setInitialLoading(true);
+    } else {
+      setFetchingMore(true);
+    }
 
     try {
       const searchParam = {
@@ -59,7 +85,8 @@ const MeditationList = () => {
       console.error("err :", err);
     } finally {
       loadingRef.current = false;
-      setLoading(false);
+      setInitialLoading(false);
+      setFetchingMore(false);
     }
   };
 
@@ -91,6 +118,10 @@ const MeditationList = () => {
   const sanitizeConfig = {
     ADD_ATTR: ["data-verse-id"],
   };
+
+  const showSkeleton = initialLoading && list.length === 0;
+  const showEmpty = !initialLoading && list.length === 0;
+
   return (
     <div className="container px-4 mt-5 mb-5">
       <div className="row gx-4 justify-content-center">
@@ -175,7 +206,7 @@ const MeditationList = () => {
         </div>
 
         <div className="col-lg-9">
-          {list?.length < 1 && (
+          {showEmpty && (
             <div className="row row-cols-1 row-cols-md-1 mb-3">
               <div className="col">
                 <div className="card mb-4 rounded-3 shadow-sm">
@@ -189,46 +220,56 @@ const MeditationList = () => {
             </div>
           )}
 
-          <div className="row row-cols-1 row-cols-md-3 mb-3">
-            {list.map((d, idx) => {
-              return (
-                <div className="col d-flex" key={d.meditationId}>
-                  <div className="card mb-4 rounded-3 shadow-sm  w-100 d-flex flex-column">
-                    <div className="card-header py-3 text-center">
-                      <h6 className="my-0 fw-normal">
-                        {d.title.length > 10 ? d.title.substring(0, 30) + "..." : d.title}
-                      </h6>
-                    </div>
-                    <div
-                      className="card-body  d-flex flex-column"
-                      style={{ whiteSpace: "pre-line" }}
-                    >
-                      <small className="mb-2">
-                        {d.bibleText.length > 200
-                          ? d.bibleText.substring(0, 200) + "..."
-                          : d.bibleText}
-                      </small>
+          {showSkeleton && (
+            <div className="row row-cols-1 row-cols-md-3 mb-3">
+              {Array.from({ length: SKELETON_COUNT }).map((_, idx) => (
+                <MeditationCardSkeleton key={`skeleton-${idx}`} />
+              ))}
+            </div>
+          )}
 
-                      <small className="mb-4">
-                        {d.etcText.length > 200 ? d.etcText.substring(0, 200) + "..." : d.etcText}
-                      </small>
-
-                      <button
-                        type="button"
-                        className="w-100 btn btn-lg btn-outline-primary mt-auto"
-                        onClick={() => onClickMove(d.meditationId)}
+          {!showSkeleton && list.length > 0 && (
+            <div className="row row-cols-1 row-cols-md-3 mb-3">
+              {list.map((d) => {
+                return (
+                  <div className="col d-flex" key={d.meditationId}>
+                    <div className="card mb-4 rounded-3 shadow-sm  w-100 d-flex flex-column">
+                      <div className="card-header py-3 text-center">
+                        <h6 className="my-0 fw-normal">
+                          {d.title.length > 10 ? d.title.substring(0, 30) + "..." : d.title}
+                        </h6>
+                      </div>
+                      <div
+                        className="card-body  d-flex flex-column"
+                        style={{ whiteSpace: "pre-line" }}
                       >
-                        {d.meditationDt}
-                      </button>
+                        <small className="mb-2">
+                          {d.bibleText.length > 200
+                            ? d.bibleText.substring(0, 200) + "..."
+                            : d.bibleText}
+                        </small>
+
+                        <small className="mb-4">
+                          {d.etcText.length > 200 ? d.etcText.substring(0, 200) + "..." : d.etcText}
+                        </small>
+
+                        <button
+                          type="button"
+                          className="w-100 btn btn-lg btn-outline-primary mt-auto"
+                          onClick={() => onClickMove(d.meditationId)}
+                        >
+                          {d.meditationDt}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           <div ref={observerRef} />
-          {loading && (
+          {fetchingMore && (
             <div className="text-center my-3">
               <div className="spinner-border m-5" role="status">
                 <span className="visually-hidden">Loading...</span>
