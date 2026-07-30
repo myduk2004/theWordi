@@ -1,5 +1,5 @@
-import { useState, useEffect, useReducer, createContext } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useReducer } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { BibleApi } from "../../api/bibleApi";
 import BibleLists from "../../components/BibleLists";
 
@@ -7,8 +7,6 @@ const TESTAMENTS = [
   { testamentId: "OLDT", testamentNm: "구약" },
   { testamentId: "NEWT", testamentNm: "신약" },
 ];
-
-export const VerseContext = createContext();
 
 const BibleSearch = () => {
   const [form, setForm] = useState({
@@ -67,6 +65,7 @@ const BibleSearch = () => {
         appliedSearch.verseTo
       ),
     enabled: !!appliedSearch,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -290,9 +289,7 @@ const BibleSearch = () => {
           </div>
 
           <div className={`col-lg-${(list?.length ?? 0) > 3 ? 12 : 9}`}>
-            <VerseContext.Provider value={list}>
-              <BibleLists></BibleLists>
-            </VerseContext.Provider>
+            <BibleLists verses={list}></BibleLists>
           </div>
         </div>
       </div>

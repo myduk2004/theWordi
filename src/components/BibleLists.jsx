@@ -1,69 +1,58 @@
-import { useContext, useState } from "react";
-import { VerseContext } from  "../pages/bible/BibleSearch"; 
+import { useContext, useState, memo } from "react";
 
-const BibleLists = () => {  
-    const verses = useContext(VerseContext);   
-    const [selectedRowIdx, setSelectedRowIdx] = useState(null); 
-    const [isSelectedRow, setSelectedRow] = useState(false); 
-    const handleMouseDown = (idx) =>{ 
-        if (selectedRowIdx === idx)
-            setSelectedRowIdx(null);
-        else 
-            setSelectedRowIdx(idx);
-    } 
-  
+const BibleLists = ({ verses }) => {
+  const [selectedRowIdx, setSelectedRowIdx] = useState(null);
+  const [isSelectedRow, setSelectedRow] = useState(false);
+  const handleMouseDown = (idx) => {
+    if (selectedRowIdx === idx) setSelectedRowIdx(null);
+    else setSelectedRowIdx(idx);
+  };
   return (
-    <>   
-    {/* <div className={`row row-cols-1 row-cols-md-${verses?verses.length:1} mb-3`}>     */}
-     <div className={`row row-cols-1 row-cols-md-${Math.min(verses?.length ?? 1, 6)} mb-3`}>     
-        { verses?.length == 0 &&  
-                 
-            <div className="col">
-                <div className="card mb-4 rounded-3 shadow-sm">
-                    <div className="card-body py-3 bg-primary-subtle text-primary-emphasis">
-                        <h6 className="my-0 fw-normal"><i className="bi bi-exclamation-circle"></i> 조회된 데이터가 없습니다.</h6>
-                    </div> 
-                </div>
+    <>
+      <div className={`row row-cols-1 row-cols-md-${Math.min(verses?.length ?? 1, 6)} mb-3`}>
+        {verses?.length === 0 && (
+          <div className="col">
+            <div className="card mb-4 rounded-3 shadow-sm">
+              <div className="card-body py-3 bg-primary-subtle text-primary-emphasis">
+                <h6 className="my-0 fw-normal">
+                  <i className="bi bi-exclamation-circle"></i> 조회된 데이터가 없습니다.
+                </h6>
+              </div>
             </div>
-                
-            // <div className="col">
-            //     <div className="card mb-4 rounded-3 shadow-sm"> 
-            //         <div className="card-body">
-            //             <p className="card-text">- 조회된 데이터가 없습니다.</p>
-            //         </div>
-            //     </div>
-            // </div>
-        } 
-        
-        { verses?.map((data, idx) => {
-            return ( 
-                <div className="col" key={data.bibleVersion.versionId}> 
-                    <div className={`card mb-4 rounded-3 shadow-sm ${idx === 0?"border-primary":""}`}> 
-                        <div className={`card-header py-3 text-center ${idx === 0?"text-bg-primary border-primary":""}`}>
-                            <h4 className="my-0 fw-normal">{data.bibleVersion.versionName}</h4>
-                        </div>
-                        <div className="card-body">   
-                            {  data.verses?.map((verse, rowIdx) => (
-                                    <p key={verse.verseId} 
-                                    onMouseDown={()=> handleMouseDown(rowIdx)} 
-                                    style={{
-                                         backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
-                                         cursor : "pointer", 
-                                        
-                                    }}
-                                    className="card-text">
-                                        {verse.verse}.{verse.text}
-                                    </p> 
-                                ))  
-                            } 
-                            </div> 
-                    </div> 
+          </div>
+        )}
+
+        {verses?.map((data, idx) => {
+          return (
+            <div className="col" key={data.bibleVersion.versionId}>
+              <div className={`card mb-4 rounded-3 shadow-sm ${idx === 0 ? "border-primary" : ""}`}>
+                <div
+                  className={`card-header py-3 text-center ${idx === 0 ? "text-bg-primary border-primary" : ""}`}
+                >
+                  <h4 className="my-0 fw-normal">{data.bibleVersion.versionName}</h4>
                 </div>
-            )
-        })} 
-    </div>  
+                <div className="card-body">
+                  {data.verses?.map((verse, rowIdx) => (
+                    <p
+                      key={verse.verseId}
+                      onMouseDown={() => handleMouseDown(rowIdx)}
+                      style={{
+                        backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
+                        cursor: "pointer",
+                      }}
+                      className="card-text"
+                    >
+                      {verse.verse}.{verse.text}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };
 
-export default BibleLists;
+export default memo(BibleLists);
