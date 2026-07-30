@@ -1,16 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { MeditationApi } from "../../api/meditationApi";
-import DOMPurify from "dompurify";
+
 const MeditationList = () => {
   const navigate = useNavigate();
-  const [list, setList] = useState([]);
-  const [page, setPage] = useState(0);
   const observerRef = useRef(null);
-  const [hasNext, setHasNext] = useState(true);
-  const hasNextRef = useRef(true);
-  const [loading, setLoading] = useState(false);
-  const loadingRef = useRef(false);
   const [searchOption, setSearchOption] = useState({
     searchItem: "title",
     keyword: "",
@@ -18,50 +13,38 @@ const MeditationList = () => {
     endDate: "",
   });
 
+  const [appliedSearch, setAppliedSearch] = useState(searchOption);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    queryKey: ["meditations", appliedSearch], // appliedSearch가 바뀌면 자동 재조회
+    queryFn: ({ pageParam }) =>
+      MeditationApi.getList({
+        title: appliedSearch.searchItem === "title" ? appliedSearch.keyword : "",
+        bibleText: appliedSearch.searchItem === "bibleText" ? appliedSearch.keyword : "",
+        etcText: appliedSearch.searchItem === "etcText" ? appliedSearch.keyword : "",
+        startDate: appliedSearch.startDate,
+        endDate: appliedSearch.endDate,
+        page: pageParam,
+        size: 6,
+      }),
+    initialPageParam: 0,
+    // 다음 페이지 번호를 어떻게 계산할지: 마지막 페이지면 undefined(더 없음), 아니면 다음 인덱스
+    getNextPageParam: (lastPage, allPages) => (lastPage.last ? undefined : allPages.length),
+  });
+
+  // data.pages는 [ {content: [...], last: false}, {content: [...], last: true} ] 형태
+  const list = data?.pages.flatMap((page) => page.content) ?? [];
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextRef.current && !loadingRef.current) {
-        setPage((prev) => prev + 1);
-      }
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage();
     });
 
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  useEffect(() => {
-    loadData(page);
-  }, [page]);
-
-  const loadData = async (curPage, reset = false) => {
-    if (loadingRef.current) return;
-    if (!reset && !hasNextRef.current) return;
-
-    loadingRef.current = true;
-    setLoading(true);
-
-    try {
-      const searchParam = {
-        title: searchOption.searchItem === "title" ? searchOption.keyword : "",
-        bibleText: searchOption.searchItem === "bibleText" ? searchOption.keyword : "",
-        etcText: searchOption.searchItem === "etcText" ? searchOption.keyword : "",
-        startDate: searchOption.startDate,
-        endDate: searchOption.endDate,
-      };
-      const data = await MeditationApi.getList({ ...searchParam, page: curPage, size: 6 });
-      const newContent = data?.content ?? [];
-
-      setList((prev) => (curPage === 0 ? newContent : [...prev, ...newContent]));
-
-      hasNextRef.current = !(data?.last ?? true);
-      setHasNext(hasNextRef.current);
-    } catch (err) {
-      console.error("err :", err);
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  };
+  const [page, setPage] = useState(0);
 
   const onClickMove = (id) => {
     if (id > 0) {
@@ -80,16 +63,7 @@ const MeditationList = () => {
   };
 
   const onClickSearch = () => {
-    //0으로 초기화 및 데이터 Load
-    setList([]);
-    hasNextRef.current = true;
-    setHasNext(true);
-    setPage(0);
-    loadData(0, true);
-  };
-
-  const sanitizeConfig = {
-    ADD_ATTR: ["data-verse-id"],
+    setAppliedSearch(searchOption);
   };
 
   return (
@@ -115,7 +89,8 @@ const MeditationList = () => {
                       <select
                         className="form-select"
                         name="searchItem"
-                        defaultValue="title"
+
+                        value={searchOption.searchItem}
                         onChange={onChange}
                       >
                         <option value="title">제목</option>
@@ -128,6 +103,7 @@ const MeditationList = () => {
                         type="text"
                         className="form-control"
                         name="keyword"
+                        value={searchOption.keyword}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") onClickSearch();
                         }}
@@ -139,6 +115,7 @@ const MeditationList = () => {
                         type="date"
                         className="form-control"
                         name="startDate"
+                        value={searchOption.startDate}
                         onChange={onChange}
                       />
                     </div>
@@ -148,6 +125,7 @@ const MeditationList = () => {
                         type="date"
                         className="form-control"
                         name="endDate"
+                        value={searchOption.endDate}
                         onChange={onChange}
                       />
                     </div>
@@ -176,7 +154,7 @@ const MeditationList = () => {
         </div>
 
         <div className="col-lg-9">
-          {list?.length < 1 && (
+          {!isLoading && list?.length < 1 && (
             <div className="row row-cols-1 row-cols-md-1 mb-3">
               <div className="col">
                 <div className="card mb-4 rounded-3 shadow-sm">
@@ -228,18 +206,17 @@ const MeditationList = () => {
             })}
           </div>
           <div ref={observerRef} />
-          {loading && (
+          {(isLoading || isFetchingNextPage) && (
             <div className="text-center my-3">
               <div className="spinner-border m-5" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
           )}
-          {!hasNext && list.length > 0 && (
+          {!hasNextPage && list.length > 0 && (
             <div className="text-center my-3">
               <p>
-                {" "}
-                <mark>마지막 페이지입니다.</mark>{" "}
+                <mark>마지막 페이지입니다.</mark>
               </p>
             </div>
           )}

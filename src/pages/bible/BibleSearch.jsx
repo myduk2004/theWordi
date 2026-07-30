@@ -1,212 +1,209 @@
 import { useState, useEffect, useReducer, createContext } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { BibleApi } from "../../api/bibleApi";
-import BibleLists from "../../components/BibleLists"; 
+import BibleLists from "../../components/BibleLists";
 
-const TESTAMENTS  = [
+const TESTAMENTS = [
   { testamentId: "OLDT", testamentNm: "구약" },
   { testamentId: "NEWT", testamentNm: "신약" },
-]; 
+];
 
 export const VerseContext = createContext();
 
-const BibleSearch = () => { 
-
+const BibleSearch = () => {
   const [form, setForm] = useState({
     versionIds: [],
     testament: "OLDT",
     bookId: 1,
     chapter: 1,
-    verse: "" , 
-    verseTo:"",
+    verse: "",
+    verseTo: "",
   });
   const [errors, setErrors] = useState([]);
-  const [list, setList] = useState([]); 
-  const [loading, setLoading] = useState(false);
-
-
-  const [version, setVersion] = useState([]);
-  const [allBook, setAllBook] = useState([]);
   const [book, setBook] = useState([]);
- const [pageTitle, setPageTitle] = useState("조회할 항목을 선택해주세요.");
+  const [allBook, setAllBook] = useState([]);
+  const [pageTitle, setPageTitle] = useState("조회할 항목을 선택해주세요.");
+
+  const [appliedSearch, setAppliedSearch] = useState(null);
+
+  const { data: versionData } = useQuery({
+    queryKey: ["bibleVersionsAndBooks"],
+    queryFn: () => BibleApi.getVersion(),
+  });
+
+  const version = versionData?.versions ?? [];
 
   useEffect(() => {
-      const init = async () => {
-         
-        const data = await BibleApi.getVersion(); 
-       
-        setVersion(data.versions); 
-        const defaultVersionId = data.versions[0]?.versionId ??"";
-        const defaultTestamentId = TESTAMENTS[0].testamentId;  
+    if (!versionData) return;
 
-        const defaultAllBooks = data.books.filter((b) => b.versionId === defaultVersionId); 
-        setAllBook(defaultAllBooks); 
-        const filteredBook = defaultAllBooks.filter((b) =>b.testament === defaultTestamentId);  
-        setBook(filteredBook); 
- 
-        setForm((prev) => ({
-          ...prev, 
-          testament: defaultTestamentId,  
-          bookId: filteredBook[0]?.bookId??"",
-        })); 
-      };
-  
-      init();
-    }, []);
+    const defaultVersionId = versionData.versions[0]?.versionId ?? "";
+    const defaultTestamentId = TESTAMENTS[0].testamentId;
 
+    const defaultAllBooks = versionData.books.filter((b) => b.versionId === defaultVersionId);
+    setAllBook(defaultAllBooks);
 
-  //성경구절 리스트 조회
-  const loadData = async () => { 
-    try
-    {
-      const data = await BibleApi.getVerses(
-        form.versionIds,
-        form.bookId,
-        form.chapter, 
-        form.verse, 
-        form.verseTo 
-      );
+    const filteredBook = defaultAllBooks.filter((b) => b.testament === defaultTestamentId);
+    setBook(filteredBook);
 
-      //console.log(data);
-      setList(data); 
-    }
-    catch(e){
+    setForm((prev) => ({
+      ...prev,
+      testament: defaultTestamentId,
+      bookId: filteredBook[0]?.bookId ?? "",
+    }));
+  }, [versionData]);
+
+  const {
+    data: list = [],
+    isFetching: isSearching,
+    isError,
+  } = useQuery({
+    queryKey: ["bibleVerses", appliedSearch],
+    queryFn: () =>
+      BibleApi.getVerses(
+        appliedSearch.versionIds,
+        appliedSearch.bookId,
+        appliedSearch.chapter,
+        appliedSearch.verse,
+        appliedSearch.verseTo
+      ),
+    enabled: !!appliedSearch,
+  });
+
+  useEffect(() => {
+    if (isError) {
       alert("목록 조회 중 오류가 발생했습니다.");
     }
-  }; 
+  }, [isError]);
 
   const handleChange = (e) => {
-    const { name, value, checked } = e.target;  
-    
+    const { name, value, checked } = e.target;
 
     //version체크시
-    if (name === "versionIds")
-    {  
-      setForm((prev) =>({ 
-        ...prev, 
-        versionIds : checked?prev.versionIds.includes(value)?prev.versionIds:[...prev.versionIds, value]
-                            :prev.versionIds.filter((id)=> id !== value) 
-      })); 
+    if (name === "versionIds") {
+      setForm((prev) => ({
+        ...prev,
+        versionIds: checked
+          ? prev.versionIds.includes(value)
+            ? prev.versionIds
+            : [...prev.versionIds, value]
+          : prev.versionIds.filter((id) => id !== value),
+      }));
     }
     //신구약 변경
     else if (name === "testament") {
-      const filteredBook = allBook.filter((b) => b.testament === value);  
+      const filteredBook = allBook.filter((b) => b.testament === value);
       setBook(filteredBook);
 
       setForm((prev) => ({
         ...prev,
-        testament: value,  
-        bookId: filteredBook[0]?.bookId ?? "" ,
-        chapter : "1",
-        verse :"",
-        verseTo : ""
+        testament: value,
+        bookId: filteredBook[0]?.bookId ?? "",
+        chapter: "1",
+        verse: "",
+        verseTo: "",
       }));
-    } 
-    else if (name === "bookId") {  
+    } else if (name === "bookId") {
       setForm((prev) => ({
-        ...prev, 
+        ...prev,
         bookId: value,
-        chapter : "1",
-        verse :"",
-        verseTo : ""
+        chapter: "1",
+        verse: "",
+        verseTo: "",
       }));
 
       setPageTitle(e.target.selectedOptions[0].text);
-    } 
-    else 
-    {  
+    } else {
       setForm((prev) => ({
         ...prev,
-        [name]:  value 
+        [name]: value,
       }));
     }
   };
 
-  const validateNumber = ({val, label, required = false, min = 1}) =>{  
-    if (val === "")
-    {
-      return required? [`${label}을(를) 입력해주세요.`]:[];
+  const validateNumber = ({ val, label, required = false, min = 1 }) => {
+    if (val === "") {
+      return required ? [`${label}을(를) 입력해주세요.`] : [];
     }
 
-    const num = Number(val);    
-    return (Number.isNaN(num) || num < min)
-        ?[`${label}을(를) ${min} 이상의 숫자로 정확히 입력해주세요.`]
-        : []; 
+    const num = Number(val);
+    return Number.isNaN(num) || num < min
+      ? [`${label}을(를) ${min} 이상의 숫자로 정확히 입력해주세요.`]
+      : [];
   };
 
   const validate = () => {
     const tmpErr = [];
-    if (!form.versionIds || form.versionIds.length < 1)
-      tmpErr.push("성경버전을 체크해주세요.");  
- 
-    tmpErr.push(...validateNumber({val : form.chapter, label : "장", required :  true, min : 1}));
-    tmpErr.push(...validateNumber({val : form.verse, label : "절(시작)", required : false, min : 1}));
-    tmpErr.push(...validateNumber({val : form.verseTo, label : "절(종료)", required : false, min : 1}));
-    
+    if (!form.versionIds || form.versionIds.length < 1) tmpErr.push("성경버전을 체크해주세요.");
 
-    if (form.verse !== "" &&  form.verseTo !== "")
-    {
+    tmpErr.push(...validateNumber({ val: form.chapter, label: "장", required: true, min: 1 }));
+    tmpErr.push(...validateNumber({ val: form.verse, label: "절(시작)", required: false, min: 1 }));
+    tmpErr.push(
+      ...validateNumber({ val: form.verseTo, label: "절(종료)", required: false, min: 1 })
+    );
+
+    if (form.verse !== "" && form.verseTo !== "") {
       const verseNum = Number(form.verse);
       const verseToNum = Number(form.verseTo);
 
-      if (!Number.isNaN(verseNum) && !Number.isNaN(verseToNum) && verseNum > verseToNum)
-      {
+      if (!Number.isNaN(verseNum) && !Number.isNaN(verseToNum) && verseNum > verseToNum) {
         tmpErr.push("시작절은 종료절보다 클 수 없습니다.");
       }
     }
 
     setErrors(tmpErr);
     return tmpErr.length === 0;
-  }; 
+  };
 
-  
-const onClickSearchButton = async (e) => {
-  e.preventDefault();  
-  if (!validate()) {
-    return;
-  } 
+  const onClickSearchButton = async (e) => {
+    e.preventDefault();
+    if (!validate()) {
+      return;
+    }
 
-  // setForm({ 
-  //   ...form, 
-  //   verse: "" 
-  // });  
-  await loadData();
-};
- 
- 
+    setAppliedSearch({ ...form });
+  };
+
   return (
     <>
       <div className="container px-4 mt-5 mb-5">
         <div className="row gx-4 justify-content-center">
           <div className="col-lg-9 mb-2">
-            <h4><i className="bi bi-search  fs-4 " style={{ color: "#6610f2" }} />  성경조회</h4> 
-          </div>  
+            <h4>
+              <i className="bi bi-search  fs-4 " style={{ color: "#6610f2" }} /> 성경조회
+            </h4>
+          </div>
 
-          <div className="col-lg-9">  
-            <div className="card mb-4"> 
-              <div className="card-header d-flex align-items-center fw-semibold fs-6"  style={{ color: "#364FC7" }}>             
-                {pageTitle} 
+          <div className="col-lg-9">
+            <div className="card mb-4">
+              <div
+                className="card-header d-flex align-items-center fw-semibold fs-6"
+                style={{ color: "#364FC7" }}
+              >
+                {pageTitle}
               </div>
 
               <div className="card-body">
                 <form className="row g-3">
-                  <div className="col-md-12"> 
-                    <div className="divBible">  
-                      {  
-                        version.map((d) => ( 
-                          <div className="form-check form-check-inline"
-                          key={d.versionId}>
-                            <input className="form-check-input" type="checkbox"  
+                  <div className="col-md-12">
+                    <div className="divBible">
+                      {version.map((d) => (
+                        <div className="form-check form-check-inline" key={d.versionId}>
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
                             onChange={handleChange}
                             id={d.versionId}
-                            name="versionIds"  
-                            value={d.versionId} />
-                            <label className="form-check-label" htmlFor={d.versionId}>{d.versionName}</label>
-                          </div>
-                        ))
-                      } 
-                    </div> 
-                  </div> 
-                  <div className="col-md-2"> 
+                            name="versionIds"
+                            value={d.versionId}
+                          />
+                          <label className="form-check-label" htmlFor={d.versionId}>
+                            {d.versionName}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="col-md-2">
                     <select
                       name="testament"
                       value={form.testament || ""}
@@ -220,7 +217,7 @@ const onClickSearchButton = async (e) => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-md-3"> 
+                  <div className="col-md-3">
                     <select
                       name="bookId"
                       value={form.bookId || ""}
@@ -234,10 +231,10 @@ const onClickSearchButton = async (e) => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-md-2"> 
+                  <div className="col-md-2">
                     <input
                       type="text"
-                      inputMode="numeric" 
+                      inputMode="numeric"
                       className="form-control"
                       placeholder="장"
                       name="chapter"
@@ -245,10 +242,10 @@ const onClickSearchButton = async (e) => {
                       value={form.chapter}
                     />
                   </div>
-                  <div className="col-md-2"> 
+                  <div className="col-md-2">
                     <input
-                     type="text"
-                      inputMode="numeric" 
+                      type="text"
+                      inputMode="numeric"
                       className="form-control"
                       placeholder="시작절"
                       name="verse"
@@ -256,10 +253,10 @@ const onClickSearchButton = async (e) => {
                       value={form.verse}
                     />
                   </div>
-                  <div className="col-md-2"> 
+                  <div className="col-md-2">
                     <input
                       type="text"
-                      inputMode="numeric" 
+                      inputMode="numeric"
                       className="form-control"
                       placeholder="종료절"
                       name="verseTo"
@@ -268,45 +265,35 @@ const onClickSearchButton = async (e) => {
                     />
                   </div>
 
-                  <div className="col-md-1"> 
-                   <button
+                  <div className="col-md-1">
+                    <button
                       type="button"
                       className="btn p-0 me-2 text-primary"
-                      onClick={onClickSearchButton} name="btn2"
-                    ><i className="bi bi-search fs-5"></i> </button>  
+                      onClick={onClickSearchButton}
+                      name="btn2"
+                      disabled={isSearching}
+                    >
+                      <i className="bi bi-search fs-5"></i>
+                    </button>
                   </div>
-              
 
-
-
-                  <div className="col-md-12 d-flex justify-content-end"> 
+                  <div className="col-md-12 d-flex justify-content-end">
                     {errors.map((e, index) => (
                       <p key={e} className="text-danger me-3">
                         * {e}
                       </p>
                     ))}
-                    {/* <button
-                      type="button"
-                      className="btn p-0 me-2 text-primary"
-                      onClick={onClickSearchButton}
-                    ><i className="bi bi-search fs-5"></i> </button>   */}
                   </div>
                 </form>
               </div>
             </div>
-
-            {/* <VerseContext.Provider value={list}>
-              <BibleLists></BibleLists>
-            </VerseContext.Provider> */}
           </div>
-  
- 
-          <div className={`col-lg-${(list?.length ?? 0)>3?12:9}`}>  
+
+          <div className={`col-lg-${(list?.length ?? 0) > 3 ? 12 : 9}`}>
             <VerseContext.Provider value={list}>
               <BibleLists></BibleLists>
             </VerseContext.Provider>
-          </div> 
-
+          </div>
         </div>
       </div>
     </>

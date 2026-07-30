@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import EditorView from "../../components/EditorView";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MeditationApi } from "../../api/meditationApi";
 import { formatDateKr } from "../../util/common.js";
 import DOMPurify from "dompurify";
@@ -9,48 +8,37 @@ import DOMPurify from "dompurify";
 const MeditationDetail = () => {
   const navigate = useNavigate();
   const { meditationId } = useParams();
-  const [meditationDt, setMeditationDt] = useState("");
-  const [title, setTitle] = useState("");
-  const [bibleText, setBibleText] = useState("");
-  const [etcText, setEtcText] = useState("");
-  const [etcSource, setEtcSource] = useState("");
-  const [content, setContent] = useState("");
+  const queryClient = useQueryClient();
 
-  const [form, setForm] = useState({
-    title,
-    meditationDt,
-    bibleText,
-    etcText,
-    etcSource,
-    content,
+  const { data, isLoading } = useQuery({
+    queryKey: ["meditation", meditationId],
+    queryFn: () => MeditationApi.getOne(meditationId),
+    enabled: !!meditationId,
   });
 
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await MeditationApi.getOne(meditationId);
-        setForm({
-          title: data.title,
-          meditationDt: formatDateKr(data.meditationDt),
-          bibleText: data.bibleText,
-          etcText: data.etcText,
-          etcSource: data.etcSource,
-          content: data.text,
-        });
-      } catch (error) {
-        console.error("데이터로딩 실패", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (meditationId) {
-      loadData();
-    }
-  }, [meditationId]);
+  const form = {
+    title: data?.title ?? "",
+    meditationDt: data ? formatDateKr(data.meditationDt) : "",
+    bibleText: data?.bibleText ?? "",
+    etcText: data?.etcText ?? "",
+    etcSource: data?.etcSource ?? "",
+    content: data?.text ?? "",
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: () => MeditationApi.delete(meditationId),
+    onSuccess: () => {
+      alert("삭제되었습니다.");
+      queryClient.invalidateQueries({ queryKey: ["meditations"] });
+      navigate(`/meditations`);
+    },
+    onError: (err) => {
+      console.error("삭제 중 오류 발생", err);
+    },
+  });
 
   const handleClick = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
     if (name === "edit") {
       navigate(`/meditations/${meditationId}/edit`);
     } else {
@@ -60,17 +48,11 @@ const MeditationDetail = () => {
 
   const handleDelete = async () => {
     if (confirm("삭제하시겠습니까?")) {
-      try {
-        await MeditationApi.delete(meditationId);
-        alert("삭제되었습니다.");
-        navigate(`/meditations`);
-      } catch (err) {
-        console.error("삭제 중 오류 발생", err);
-      }
+      deleteMutation.mutate();
     }
   };
 
-  if (loading && !content) {
+  if (isLoading) {
     return (
       <div className="d-flex flex-column justify-content-center align-items-center vh-100">
         <div className="spinner-border" role="status">
@@ -135,8 +117,13 @@ const MeditationDetail = () => {
                   >
                     수정
                   </button>
-                  <button type="button" onClick={handleDelete} className="btn btn-danger">
-                    삭제
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                  >
+                    {deleteMutation.isPending ? "삭제 중..." : "삭제"}
                   </button>
                 </div>
               </form>

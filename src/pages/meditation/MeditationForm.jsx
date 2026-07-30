@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MeditationApi } from "../../api/meditationApi";
 import BibleSearch from "../../components/BibleSearch";
 import { todayYMD } from "../../util/common.js";
-import { useNavigate } from "react-router-dom";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 
 const MeditationForm = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const { meditationId } = useParams();
   const editorRef = useRef(null);
-  const [verses, setVerses] = useState([]);
+  const queryClient = useQueryClient();
 
+  const [verses, setVerses] = useState([]);
   const [form, setForm] = useState({
     meditationDt: todayYMD(),
     title: "",
@@ -26,41 +26,52 @@ const MeditationForm = () => {
     content: false,
   });
 
+  const { data, isSuccess } = useQuery({
+    queryKey: ["meditation", meditationId],
+    queryFn: () => MeditationApi.getOne(meditationId),
+    enabled: !!meditationId,
+  });
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await MeditationApi.getOne(meditationId);
+    if (!isSuccess || !data) return;
 
-        if (data.bibleVerses != null) {
-          const myVerses = data.bibleVerses
-            .filter((v) => v.verses && v.verses.length > 0)
-            .flatMap((v) => v.verses);
-          setVerses(myVerses);
-        }
-
-        setForm({
-          meditationDt: data.meditationDt,
-          title: data.title,
-          etcText: data.etcText,
-          etcSource: data.etcSource,
-        });
-
-        setContent(data.text || "");
-      } catch (err) {
-        console.error("데이터 로드 실패 : ", err);
-      }
-    };
-
-    if (meditationId) {
-      loadData();
+    if (data.bibleVerses != null) {
+      const myVerses = data.bibleVerses
+        .filter((v) => v.verses && v.verses.length > 0)
+        .flatMap((v) => v.verses);
+      setVerses(myVerses);
     }
 
-    setLoading(false);
-  }, [meditationId]);
+    setForm({
+      meditationDt: data.meditationDt,
+      title: data.title,
+      etcText: data.etcText,
+      etcSource: data.etcSource,
+    });
+
+    setContent(data.text || "");
+  }, [isSuccess, data]);
+
+  const saveMutation = useMutation({
+    mutationFn: (formData) =>
+      meditationId ? MeditationApi.update(formData) : MeditationApi.create(formData),
+    onSuccess: (res) => {
+      if (res.meditationId) {
+        queryClient.invalidateQueries({ queryKey: ["meditations"] });
+        if (res.meditationId) {
+          queryClient.invalidateQueries({ queryKey: ["meditation", meditationId] });
+        }
+        navigate(`/meditations/${res.meditationId}`);
+      } else {
+        alert("저장 중 오류가 발생했습니다.");
+      }
+    },
+    onError: (err) => {
+      console.err("저장 중 오류 발생", err);
+    },
+  });
 
   const handleSubmit = async () => {
-    if (loading) return;
-
     const currentContent = editorRef.current?.getHTML() || "";
 
     if (!validate(currentContent)) {
@@ -91,19 +102,7 @@ const MeditationForm = () => {
       verseIds: verseIds,
     };
 
-    try {
-      const res = await (meditationId
-        ? MeditationApi.update(formData)
-        : MeditationApi.create(formData));
-
-      if (res.meditationId) {
-        navigate(`/meditations/${res.meditationId}`);
-      } else {
-        alert("저장 중 오류가 발생했습니다.");
-      }
-    } catch (err) {
-      console.error("저장 중 오류 발생", err);
-    }
+    saveMutation.mutate(formData);
   };
 
   const validate = (currentContent) => {
@@ -267,8 +266,13 @@ const MeditationForm = () => {
                     >
                       목록
                     </button>
-                    <button type="button" onClick={handleSubmit} className="btn btn-primary">
-                      저장
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleSubmit}
+                      disabled={saveMutation.isPending}
+                    >
+                      {saveMutation.isPending ? "저장 중..." : "저장"}
                     </button>
                   </div>
                 </form>
