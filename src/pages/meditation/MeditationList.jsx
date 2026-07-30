@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { MeditationApi } from "../../api/meditationApi";
 
 const MeditationList = () => {
@@ -15,22 +15,24 @@ const MeditationList = () => {
 
   const [appliedSearch, setAppliedSearch] = useState(searchOption);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ["meditations", appliedSearch], // appliedSearch가 바뀌면 자동 재조회
-    queryFn: ({ pageParam }) =>
-      MeditationApi.getList({
-        title: appliedSearch.searchItem === "title" ? appliedSearch.keyword : "",
-        bibleText: appliedSearch.searchItem === "bibleText" ? appliedSearch.keyword : "",
-        etcText: appliedSearch.searchItem === "etcText" ? appliedSearch.keyword : "",
-        startDate: appliedSearch.startDate,
-        endDate: appliedSearch.endDate,
-        page: pageParam,
-        size: 6,
-      }),
-    initialPageParam: 0,
-    // 다음 페이지 번호를 어떻게 계산할지: 마지막 페이지면 undefined(더 없음), 아니면 다음 인덱스
-    getNextPageParam: (lastPage, allPages) => (lastPage.last ? undefined : allPages.length),
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching } =
+    useInfiniteQuery({
+      queryKey: ["meditations", appliedSearch], // appliedSearch가 바뀌면 자동 재조회
+      queryFn: ({ pageParam }) =>
+        MeditationApi.getList({
+          title: appliedSearch.searchItem === "title" ? appliedSearch.keyword : "",
+          bibleText: appliedSearch.searchItem === "bibleText" ? appliedSearch.keyword : "",
+          etcText: appliedSearch.searchItem === "etcText" ? appliedSearch.keyword : "",
+          startDate: appliedSearch.startDate,
+          endDate: appliedSearch.endDate,
+          page: pageParam,
+          size: 6,
+        }),
+      initialPageParam: 0,
+      // 다음 페이지 번호를 어떻게 계산할지: 마지막 페이지면 undefined(더 없음), 아니면 다음 인덱스
+      getNextPageParam: (lastPage, allPages) => (lastPage.last ? undefined : allPages.length),
+      placeholderData: keepPreviousData,
+    });
 
   // data.pages는 [ {content: [...], last: false}, {content: [...], last: true} ] 형태
   const list = data?.pages.flatMap((page) => page.content) ?? [];
@@ -43,8 +45,6 @@ const MeditationList = () => {
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const [page, setPage] = useState(0);
 
   const onClickMove = (id) => {
     if (id > 0) {
@@ -206,7 +206,7 @@ const MeditationList = () => {
             })}
           </div>
           <div ref={observerRef} />
-          {(isLoading || isFetchingNextPage) && (
+          {(isLoading || isFetchingNextPage || (isFetching && !isFetchingNextPage)) && (
             <div className="text-center my-3">
               <div className="spinner-border m-5" role="status">
                 <span className="visually-hidden">Loading...</span>
