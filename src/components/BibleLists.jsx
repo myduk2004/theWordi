@@ -33,17 +33,18 @@ const BibleLists = ({ verses }) => {
                 </div>
                 <div className="card-body">
                   {data.verses?.map((verse, rowIdx) => (
-                    <p
-                      key={verse.verseId}
-                      onMouseDown={() => handleMouseDown(rowIdx)}
-                      style={{
-                        backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
-                        cursor: "pointer",
-                      }}
-                      className="card-text"
-                    >
-                      {verse.verse}.{verse.text}
-                    </p>
+                    <div className="card-text" key={verse.verseId}>
+                      <h6>{verse.subTitle}</h6>
+                      <p
+                        onMouseDown={() => handleMouseDown(rowIdx)}
+                        style={{
+                          backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {verse.verse}.{verse.text}
+                      </p>
+                    </div>
                   ))}
                 </div>
               </div>
