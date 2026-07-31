@@ -36,6 +36,10 @@ const BibleLists = ({ verses }) => {
                     let titleAlign = "";
                     if (verse.subTitle && verse.bookId === 19 && verse.chapter === 119)
                       titleAlign = "text-center";
+
+                    let verseText = verse.text;
+                    if (verse.verse < 999) verseText = verse.verse + ". " + verseText;
+
                     return (
                       <div className="card-text" key={verse.verseId}>
                         {verse.subTitle && (
@@ -48,28 +52,11 @@ const BibleLists = ({ verses }) => {
                             cursor: "pointer",
                           }}
                         >
-                          {verse.verse}.{verse.text}
+                          {verseText}
                         </p>
                       </div>
                     );
                   })}
-                  {/* {data.verses?.map((verse, rowIdx) => (
-                    <div className="card-text" key={verse.verseId}>
-                      {verse.subTitle && verse.bookId == 19 && verse.chapter == 119 && (
-                        <h6 className="text-center mt-2 mb-4">{verse.subTitle}</h6>
-                      )}
-                      {verse.subTitle && <h6 className="mt-2 mb-4">{verse.subTitle}</h6>}
-                      <p
-                        onMouseDown={() => handleMouseDown(rowIdx)}
-                        style={{
-                          backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {verse.verse}.{verse.text}
-                      </p>
-                    </div>
-                  ))} */}
                 </div>
               </div>
             </div>
