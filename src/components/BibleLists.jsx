@@ -32,9 +32,33 @@ const BibleLists = ({ verses }) => {
                   <h4 className="my-0 fw-normal">{data.bibleVersion.versionName}</h4>
                 </div>
                 <div className="card-body">
-                  {data.verses?.map((verse, rowIdx) => (
+                  {data.verses?.map((verse, rowIdx) => {
+                    let titleAlign = "";
+                    if (verse.subTitle && verse.bookId === 19 && verse.chapter === 119)
+                      titleAlign = "text-center";
+                    return (
+                      <div className="card-text" key={verse.verseId}>
+                        {verse.subTitle && (
+                          <h6 className={`${titleAlign} mt-2 mb-4`}>{verse.subTitle}</h6>
+                        )}
+                        <p
+                          onMouseDown={() => handleMouseDown(rowIdx)}
+                          style={{
+                            backgroundColor: selectedRowIdx === rowIdx ? "#FFF6D6" : "white",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {verse.verse}.{verse.text}
+                        </p>
+                      </div>
+                    );
+                  })}
+                  {/* {data.verses?.map((verse, rowIdx) => (
                     <div className="card-text" key={verse.verseId}>
-                      {verse.subTitle && <h6 className="mb-4">{verse.subTitle}</h6>}
+                      {verse.subTitle && verse.bookId == 19 && verse.chapter == 119 && (
+                        <h6 className="text-center mt-2 mb-4">{verse.subTitle}</h6>
+                      )}
+                      {verse.subTitle && <h6 className="mt-2 mb-4">{verse.subTitle}</h6>}
                       <p
                         onMouseDown={() => handleMouseDown(rowIdx)}
                         style={{
@@ -45,7 +69,7 @@ const BibleLists = ({ verses }) => {
                         {verse.verse}.{verse.text}
                       </p>
                     </div>
-                  ))}
+                  ))} */}
                 </div>
               </div>
             </div>
