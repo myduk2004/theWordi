@@ -34,7 +34,7 @@ const BibleLists = ({ verses }) => {
                 <div className="card-body">
                   {data.verses?.map((verse, rowIdx) => (
                     <div className="card-text" key={verse.verseId}>
-                      <h6>{verse.subTitle}</h6>
+                      {verse.subTitle && <h6 className="mb-3">{verse.subTitle}</h6>}
                       <p
                         onMouseDown={() => handleMouseDown(rowIdx)}
                         style={{
