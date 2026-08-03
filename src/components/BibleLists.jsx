@@ -43,13 +43,17 @@ const BibleLists = ({ verses }) => {
                       const verseTo = match_verse ? match_verse[1] : "";
                       if (verseTo != "") {
                         verseText =
-                          verse.verse + "-" + verseTo + " " + verseText.replace(match_verse[0], "");
+                          verse.verse +
+                          "-" +
+                          verseTo +
+                          "  " +
+                          verseText.replace(match_verse[0], "");
                       } else {
                         verseText =
                           verse.verse +
                           (data.bibleVersion.versionId === "NKRV" ||
                           data.bibleVersion.versionId === "RNKSV"
-                            ? " "
+                            ? "  "
                             : ". ") +
                           verseText;
                       }
