@@ -38,7 +38,19 @@ const BibleLists = ({ verses }) => {
                       titleAlign = "text-center";
 
                     let verseText = verse.text;
-                    if (verse.verse < 999) verseText = verse.verse + ". " + verseText;
+                    if (verse.verse < 999) {
+                      const match_verse = verseText.match(/^#VERSE_TO_(\d+)#/);
+                      const verseTo = match_verse ? match_verse[1] : "";
+                      if (verseTo != "") {
+                        verseText =
+                          verse.verse + "-" + verseTo + " " + verseText.replace(match_verse[0], "");
+                      } else {
+                        verseText =
+                          verse.verse +
+                          (verse.versionId === "NKRV" || verse.versionId === "RNKSV" ? " " : ". ") +
+                          verseText;
+                      }
+                    }
 
                     return (
                       <div className="card-text" key={verse.verseId}>
