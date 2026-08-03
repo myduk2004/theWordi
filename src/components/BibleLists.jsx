@@ -47,7 +47,10 @@ const BibleLists = ({ verses }) => {
                       } else {
                         verseText =
                           verse.verse +
-                          (verse.versionId === "NKRV" || verse.versionId === "RNKSV" ? " " : ". ") +
+                          (data.bibleVersion.versionId === "NKRV" ||
+                          data.bibleVersion.versionId === "RNKSV"
+                            ? " "
+                            : ". ") +
                           verseText;
                       }
                     }
